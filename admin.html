@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OW陪玩 - 后台控制台</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .glass {
+            background: rgba(20, 20, 30, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .status-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .status-btn.active {
+            transform: scale(1.02);
+        }
+        
+        .status-online {
+            background: linear-gradient(135deg, #00FF99 0%, #00CC7A 100%);
+            box-shadow: 0 0 30px rgba(0, 255, 153, 0.4);
+        }
+        
+        .status-ingame {
+            background: linear-gradient(135deg, #FFCC00 0%, #CC9900 100%);
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.4);
+        }
+        
+        .status-busy {
+            background: linear-gradient(135deg, #FF3B30 0%, #CC2A20 100%);
+            box-shadow: 0 0 30px rgba(255, 59, 48, 0.4);
+        }
+        
+        .pulse-ring {
+            position: absolute;
+            border-radius: 50%;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            border-color: #0A84FF;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #0A84FF 0%, #0066CC 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4);
+        }
+        
+        .save-btn:active {
+            transform: translateY(0);
+        }
+        
+        .preview-card {
+            background: linear-gradient(135deg, rgba(30, 30, 45, 0.9) 0%, rgba(20, 20, 30, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .dot-online {
+            background: #00FF99;
+            box-shadow: 0 0 10px #00FF99;
+        }
+        
+        .dot-ingame {
+            background: #FFCC00;
+            box-shadow: 0 0 10px #FFCC00;
+        }
+        
+        .dot-busy {
+            background: #FF3B30;
+            box-shadow: 0 0 10px #FF3B30;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 255, 153, 0.9);
+            color: black;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function AdminPanel() {
+            const [status, setStatus] = useState('online');
+            const [mood, setMood] = useState('手感爆热，带飞！');
+            const [currentGame, setCurrentGame] = useState('');
+            const [estimatedEnd, setEstimatedEnd] = useState('');
+            const [showToast, setShowToast] = useState(false);
+            const [lastUpdated, setLastUpdated] = useState(new Date());
+            
+            const statusConfig = {
+                online: { label: '在线', color: '#00FF99', desc: '空闲，可接单', dotClass: 'dot-online' },
+                ingame: { label: '游戏中', color: '#FFCC00', desc: '正在游戏', dotClass: 'dot-ingame' },
+                busy: { label: '忙碌', color: '#FF3B30', desc: '已被包场', dotClass: 'dot-busy' }
+            };
+            
+            const handleSave = () => {
+                // 这里可以添加 Supabase 实时同步逻辑
+                console.log('保存状态:', { status, mood, currentGame, estimatedEnd });
+                setLastUpdated(new Date());
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2000);
+            };
+            
+            const formatTime = (date) => {
+                return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            };
+            
+            return (
+                <div className="min-h-screen bg-[#0a0a0f] px-4 py-6 max-w-md mx-auto">
+                    {/* 背景装饰 */}
+                    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-[#0A84FF]/10 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
+                    </div>
+                    
+                    <div className="relative z-10">
+                        {/* 头部 */}
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h1 className="text-2xl font-bold text-white">后台控制台</h1>
+                                <p className="text-white/40 text-sm mt-1">管理你的实时状态</p>
+                            </div>
+                            <a href="index.html" className="text-[#0A84FF] text-sm hover:underline">查看前台 →</a>
+                        </div>
+                        
+                        {/* 状态选择 */}
+                        <div className="glass rounded-2xl p-5 mb-6">
+                            <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+                                当前状态
+                            </h2>
+                            
+                            <div className="space-y-3">
+                                {Object.entries(statusConfig).map(([key, config]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setStatus(key)}
+                                        className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === key ? 'active ' + (key === 'online' ? 'status-online' : key === 'ingame' ? 'status-ingame' : 'status-busy') : 'bg-white/5'}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded-full ${config.dotClass} ${status === key ? 'animate-pulse' : ''}`}></div>
+                                        <div className="text-left flex-1">
+                                            <div className={`font-semibold ${status === key ? 'text-black' : 'text-white'}`}>
+                                                {config.label}
+                                            </div>
+                                            <div className={`text-sm ${status === key ? 'text-black/70' : 'text-white/50'}`}>
+                                                {config.desc}
+                                            </div>
+                                        </div>
+                                        {status === key && (
+                                            <svg className={`w-6 h-6 ${status === key ? 'text-black' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* 详细信息 */}
+                        <div className="glass rounded-2xl p-5 mb-6">
+                            <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+                                详细信息
+                            </h2>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-white/60 text-sm mb-2 block">实时心情</label>
+                                    <input
+                                        type="text"
+                                        value={mood}
+                                        onChange={(e) => setMood(e.target.value)}
+                                        className="input-field"
+                                        placeholder="例如：手感爆热，带飞！"
+                                        maxLength={30}
+                                    />
+                                </div>
+                                
+                                {status === 'ingame' && (
+                                    <>
+                                        <div>
+                                            <label className="text-white/60 text-sm mb-2 block">当前对局</label>
+                                            <input
+                                                type="text"
+                                                value={currentGame}
+                                                onChange={(e) => setCurrentGame(e.target.value)}
+                                                className="input-field"
+                                                placeholder="例如：竞技模式 - 国王大道"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-white/60 text-sm mb-2 block">预计结束时间</label>
+                                            <input
+                                                type="time"
+                                                value={estimatedEnd}
+                                                onChange={(e) => setEstimatedEnd(e.target.value)}
+                                                className="input-field"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* 预览 */}
+                        <div className="preview-card rounded-2xl p-5 mb-6">
+                            <h2 className="text-white/60 text-sm mb-4">前台预览</h2>
+                            <div className="flex items-center gap-3">
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl font-bold`}>
+                                    C
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-white font-semibold">CyberNinja</div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className={`status-dot ${statusConfig[status].dotClass}`}></span>
+                                        <span style={{color: statusConfig[status].color}} className="text-sm font-medium">
+                                            {statusConfig[status].label}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-white/10">
+                                <p className="text-white/70 text-sm">{mood}</p>
+                            </div>
+                        </div>
+                        
+                        {/* 保存按钮 */}
+                        <button
+                            onClick={handleSave}
+                            className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            保存并同步
+                        </button>
+                        
+                        <p className="text-center text-white/30 text-xs mt-4">
+                            上次同步: {formatTime(lastUpdated)}
+                        </p>
+                    </div>
+                    
+                    {/* Toast */}
+                    <div className={`toast ${showToast ? 'show' : ''}`}>
+                        ✓ 状态已同步
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<AdminPanel />);
+    </script>
+</body>
+</html>
