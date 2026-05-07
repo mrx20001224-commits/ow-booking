@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="守望先锋陪玩实时预约看板 - 专业电竞陪玩服务">
+    <meta name="theme-color" content="#0a0a0f">
+    
+    <!-- 微信分享卡片 -->
+    <meta itemprop="name" content="🎮 我的实时接单看板（当前：在线）">
+    <meta itemprop="description" content="守望先锋专业陪玩 | 国服挑战者 | 16年老玩家">
+    <meta itemprop="image" content="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=300&fit=crop">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="🎮 我的实时接单看板（当前：在线）">
+    <meta property="og:description" content="守望先锋专业陪玩 | 国服挑战者 | 16年老玩家">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=300&fit=crop">
+    <meta property="og:type" content="website">
+    
+    <title>守望先锋陪玩 - 实时预约看板</title>
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+        }
+        
+        .glass {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 30, 45, 0.8) 0%, rgba(20, 20, 30, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-strong {
+            background: rgba(25, 25, 35, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        
+        .glow-green { box-shadow: 0 0 20px rgba(0, 255, 153, 0.5), 0 0 40px rgba(0, 255, 153, 0.3); }
+        .glow-yellow { box-shadow: 0 0 20px rgba(255, 204, 0, 0.5), 0 0 40px rgba(255, 204, 0, 0.3); }
+        .glow-red { box-shadow: 0 0 20px rgba(255, 59, 48, 0.5), 0 0 40px rgba(255, 59, 48, 0.3); }
+        .glow-blue { box-shadow: 0 0 20px rgba(10, 132, 255, 0.5), 0 0 40px rgba(10, 132, 255, 0.3); }
+        
+        .glow-text-green { text-shadow: 0 0 10px rgba(0, 255, 153, 0.8), 0 0 20px rgba(0, 255, 153, 0.5); }
+        .glow-text-yellow { text-shadow: 0 0 10px rgba(255, 204, 0, 0.8), 0 0 20px rgba(255, 204, 0, 0.5); }
+        .glow-text-red { text-shadow: 0 0 10px rgba(255, 59, 48, 0.8), 0 0 20px rgba(255, 59, 48, 0.5); }
+        
+        @keyframes breathe {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+        .breathe { animation: breathe 2s ease-in-out infinite; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 153, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 153, 0.8), 0 0 60px rgba(0, 255, 153, 0.4); }
+        }
+        @keyframes pulse-glow-yellow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 204, 0, 0.4); }
+        }
+        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .pulse-glow-yellow { animation: pulse-glow-yellow 2s ease-in-out infinite; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .scroll-item { scroll-snap-align: start; flex-shrink: 0; }
+        
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-switch.active { background: #0A84FF; }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .toggle-switch.active::after { left: 26px; }
+        
+        .btn-glow { transition: all 0.3s ease; }
+        .btn-glow:hover { transform: translateY(-2px); }
+        .btn-glow:active { transform: translateY(0); }
+        
+        .video-container {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .video-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(10, 10, 15, 0.8) 100%);
+            pointer-events: none;
+        }
+        
+        .price-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(30, 30, 45, 0.9) 0%, rgba(20, 20, 30, 0.8) 100%);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .price-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .price-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(10, 132, 255, 0.2);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-online {
+            background: #00FF99;
+            box-shadow: 0 0 10px #00FF99, 0 0 20px rgba(0, 255, 153, 0.5);
+        }
+        .status-ingame {
+            background: #FFCC00;
+            box-shadow: 0 0 10px #FFCC00, 0 0 20px rgba(255, 204, 0, 0.5);
+        }
+        .status-busy {
+            background: #FF3B30;
+            box-shadow: 0 0 10px #FF3B30, 0 0 20px rgba(255, 59, 48, 0.5);
+        }
+        
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .lightbox.active { opacity: 1; visibility: visible; }
+        
+        .mood-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .mood-input:focus {
+            border-color: #0A84FF;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #0A84FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #FF3B30;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #FF3B30;
+            border-radius: 50%;
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const mockData = {
+            player: {
+                name: "CyberNinja",
+                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop",
+                title: "国服挑战者 / 16年老登 / 5000+小时",
+                mood: "手感爆热，带飞！",
+                status: "online",
+                currentGame: null,
+                estimatedEnd: null,
+                rank: "宗师",
+                rating: "4200"
+            },
+            prices: [
+                { id: 1, rank: "快速游戏", price: 25, description: "轻松娱乐局", popular: false },
+                { id: 2, rank: "钻石段位", price: 40, description: "钻石守门员", popular: true },
+                { id: 3, rank: "大师段位", price: 60, description: "大师进阶", popular: false },
+                { id: 4, rank: "宗师段位", price: 80, description: "高端局", popular: false },
+                { id: 5, rank: "百强局", price: 120, description: "顶尖对局", popular: false },
+            ],
+            portfolio: [
+                { id: 1, type: "video", title: "源氏五杀精彩集锦", thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop", videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-gaming-setup-with-colorful-keyboard-4716-large.mp4" },
+                { id: 2, type: "image", title: "宗师局MVP", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop" },
+                { id: 3, type: "video", title: "极限反杀时刻", thumbnail: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&h=300&fit=crop", videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-gaming-setup-with-colorful-keyboard-4716-large.mp4" },
+                { id: 4, type: "image", title: "团队配合完美团", thumbnail: "https://images.unsplash.com/photo-1493711662062-fa541f7f3d24?w=400&h=300&fit=crop" },
+            ],
+            features: [
+                { id: "cantonese", label: "粤语交流", enabled: false },
+                { id: "review", label: "提供复盘", enabled: true },
+                { id: "voice", label: "语音指导", enabled: true },
+                { id: "custom", label: "定制下单", enabled: false },
+            ]
+        };
+        
+        function VideoHeader() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            return (
+                <div className="video-container w-full aspect-[16/10] mb-4 fade-in-up">
+                    <video
+                        className="w-full h-full object-cover"
+                        autoPlay muted loop playsInline
+                        webkit-playsinline="true"
+                        x5-playsinline="true"
+                        x5-video-player-type="h5"
+                        poster="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=500&fit=crop"
+                        onLoadedData={() => setIsLoaded(true)}
+                    >
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-gaming-setup-with-colorful-keyboard-4716-large.mp4" type="video/mp4" />
+                    </video>
+                    {!isLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                            <div className="loading-spinner"></div>
+                        </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                        <div className="live-indicator">
+                            <span className="live-dot"></span>LIVE
+                        </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                        <div className="glass-strong rounded-lg px-4 py-2 inline-flex items-center gap-2">
+                            <span className="text-2xl">🔥</span>
+                            <span className="text-white font-semibold">热门陪玩推荐</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function ProfileCard({ player, onMoodChange }) {
+            const [isEditing, setIsEditing] = useState(false);
+            const [tempMood, setTempMood] = useState(player.mood);
+            
+            const getStatusConfig = (status) => {
+                switch(status) {
+                    case 'online': return { color: '#00FF99', text: 'Online', dotClass: 'status-online pulse-glow', textClass: 'text-[#00FF99] glow-text-green', bgClass: 'bg-[#00FF99]/10', borderClass: 'border-[#00FF99]/30' };
+                    case 'ingame': return { color: '#FFCC00', text: 'In-Game', dotClass: 'status-ingame pulse-glow-yellow', textClass: 'text-[#FFCC00] glow-text-yellow', bgClass: 'bg-[#FFCC00]/10', borderClass: 'border-[#FFCC00]/30' };
+                    case 'busy': return { color: '#FF3B30', text: 'Busy', dotClass: 'status-busy breathe', textClass: 'text-[#FF3B30] glow-text-red', bgClass: 'bg-[#FF3B30]/10', borderClass: 'border-[#FF3B30]/30' };
+                    default: return { color: '#00FF99', text: 'Online', dotClass: 'status-online pulse-glow', textClass: 'text-[#00FF99] glow-text-green', bgClass: 'bg-[#00FF99]/10', borderClass: 'border-[#00FF99]/30' };
+                }
+            };
+            
+            const statusConfig = getStatusConfig(player.status);
+            
+            return (
+                <div className="glass-card rounded-2xl p-5 mb-4 fade-in-up delay-100">
+                    <div className="flex items-start gap-4 mb-4">
+                        <div className="relative">
+                            <img src={player.avatar} alt={player.name} className="w-20 h-20 rounded-2xl object-cover border-2 border-white/10" />
+                            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[#1a1a2e] ${statusConfig.dotClass}`}></div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-white text-xl font-bold truncate">{player.name}</h2>
+                            <p className="text-white/50 text-xs mt-1">{player.title}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className={`status-dot ${statusConfig.dotClass}`}></span>
+                                <span className={`text-sm font-semibold ${statusConfig.textClass}`}>{statusConfig.text}</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-white/40 text-xs">当前赛季</div>
+                            <div className="text-[#0A84FF] font-bold text-lg">{player.rank}</div>
+                            <div className="text-white/60 text-sm">{player.rating} SR</div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-white/5 rounded-xl p-3">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-white/40 text-xs">实时心情</span>
+                            {!isEditing && <button onClick={() => setIsEditing(true)} className="text-[#0A84FF] text-xs hover:underline">编辑</button>}
+                        </div>
+                        {isEditing ? (
+                            <div className="flex gap-2">
+                                <input type="text" value={tempMood} onChange={(e) => setTempMood(e.target.value)} className="mood-input flex-1" placeholder="输入你的心情..." maxLength={30} />
+                                <button onClick={() => { onMoodChange(tempMood); setIsEditing(false); }} className="px-3 py-2 bg-[#0A84FF] text-white rounded-lg text-sm font-medium">保存</button>
+                            </div>
+                        ) : <p className="text-white/80 text-sm">{player.mood}</p>}
+                    </div>
+                    
+                    {player.status !== 'online' && (
+                        <div className={`mt-3 ${statusConfig.bgClass} border ${statusConfig.borderClass} rounded-lg px-4 py-3`}>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{background: statusConfig.color}}></div>
+                                <span style={{color: statusConfig.color}} className="text-sm">
+                                    {player.status === 'ingame' ? `游戏中 - 预计 ${player.estimatedEnd || '22:00'} 结束` : '已被包场'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function PriceList({ prices, onBook, status }) {
+            const [bookedId, setBookedId] = useState(null);
+            const handleBook = (id) => {
+                if (status !== 'online') { alert('当前状态不可预约，请稍后再试'); return; }
+                setBookedId(id);
+                onBook(id);
+                setTimeout(() => setBookedId(null), 2000);
+            };
+            return (
+                <div className="mb-4 fade-in-up delay-200">
+                    <h3 className="text-white text-lg font-bold mb-3 flex items-center gap-2">
+                        <span className="w-1 h-5 bg-[#0A84FF] rounded-full"></span>
+                        陪玩价格
+                        {prices.some(p => p.popular) && <span className="text-xs bg-[#FF3B30]/20 text-[#FF3B30] px-2 py-0.5 rounded-full">热门</span>}
+                    </h3>
+                    <div className="space-y-3">
+                        {prices.map((item) => (
+                            <div key={item.id} className="price-card p-4 flex items-center justify-between group">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-white font-semibold">{item.rank}</span>
+                                        {item.popular && <span className="text-[10px] bg-gradient-to-r from-[#FF3B30] to-[#FF6B35] text-white px-1.5 py-0.5 rounded">HOT</span>}
+                                    </div>
+                                    <div className="text-white/50 text-sm">{item.description}</div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right">
+                                        <span className="text-[#0A84FF] text-2xl font-bold">{item.price}</span>
+                                        <span className="text-white/60 text-sm">r/小时</span>
+                                    </div>
+                                    <button onClick={() => handleBook(item.id)} disabled={status !== 'online'} className={`btn-glow px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${bookedId === item.id ? 'bg-[#00FF99] text-black glow-green' : status === 'online' ? 'bg-[#0A84FF] text-white glow-blue' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}>
+                                        {bookedId === item.id ? '已预约 ✓' : '点此预约'}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        
+        function Portfolio({ items, onPlay }) {
+            return (
+                <div className="mb-4 fade-in-up delay-300">
+                    <h3 className="text-white text-lg font-bold mb-3 flex items-center gap-2">
+                        <span className="w-1 h-5 bg-[#0A84FF] rounded-full"></span>高光时刻
+                    </h3>
+                    <div className="horizontal-scroll gap-3 pb-2 -mx-4 px-4">
+                        {items.map((item) => (
+                            <div key={item.id} className="scroll-item w-44">
+                                <div className="relative rounded-xl overflow-hidden aspect-video bg-gray-800 cursor-pointer group" onClick={() => onPlay(item)}>
+                                    <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
+                                    {item.type === "video" && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-12 h-12 rounded-full bg-[#0A84FF]/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
+                                        <div className="flex items-center gap-1.5">
+                                            {item.type === "video" && <span className="text-[10px] bg-[#FF3B30] text-white px-1.5 py-0.5 rounded">视频</span>}
+                                            <p className="text-white text-xs truncate">{item.title}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        
+        function VideoLightbox({ item, onClose }) {
+            if (!item) return null;
+            return (
+                <div className={`lightbox ${item ? 'active' : ''}`} onClick={onClose}>
+                    <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative rounded-2xl overflow-hidden bg-black">
+                            {item.type === 'video' ? (
+                                <video className="w-full" controls autoPlay playsInline>
+                                    <source src={item.videoUrl} type="video/mp4" />
+                                </video>
+                            ) : (
+                                <img src={item.thumbnail} alt={item.title} className="w-full" />
+                            )}
+                            <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center text-xl">×</button>
+                        </div>
+                        <p className="text-white text-center mt-4 font-medium">{item.title}</p>
+                    </div>
+                </div>
+            );
+        }
+        
+        function FeatureToggles({ features: initialFeatures }) {
+            const [features, setFeatures] = useState(initialFeatures);
+            const toggleFeature = (id) => setFeatures(features.map(f => f.id === id ? { ...f, enabled: !f.enabled } : f));
+            return (
+                <div className="glass-card rounded-2xl p-4 mb-4 fade-in-up delay-400">
+                    <h3 className="text-white text-lg font-bold mb-4 flex items-center gap-2">
+                        <span className="w-1 h-5 bg-[#0A84FF] rounded-full"></span>服务选项
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        {features.map((feature) => (
+                            <div key={feature.id} className="flex items-center justify-between">
+                                <span className="text-white/80 text-sm">{feature.label}</span>
+                                <div className={`toggle-switch ${feature.enabled ? 'active' : ''}`} onClick={() => toggleFeature(feature.id)}></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        
+        function ContactModal({ isOpen, onClose }) {
+            const wechatId = "CyberNinja_OW";
+            const [copied, setCopied] = useState(false);
+            
+            const copyWechat = () => {
+                navigator.clipboard.writeText(wechatId);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
+            
+            if (!isOpen) return null;
+            
+            return (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+                    <div className="glass-strong rounded-2xl p-6 max-w-sm w-full modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-white text-xl font-bold mb-4 text-center">联系老板确认</h3>
+                        <div className="bg-white p-4 rounded-xl mb-4">
+                            <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                                <div className="text-center text-gray-800">
+                                    <div className="text-6xl mb-2">📱</div>
+                                    <p className="text-sm">微信二维码</p>
+                                    <p className="text-xs text-gray-500 mt-1">请添加微信联系</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/5 rounded-lg p-3 mb-4">
+                            <span className="text-white/60 text-sm">微信号:</span>
+                            <span className="text-white font-mono flex-1">{wechatId}</span>
+                            <button onClick={copyWechat} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${copied ? 'bg-[#00FF99] text-black' : 'bg-[#0A84FF] text-white'}`}>
+                                {copied ? '已复制 ✓' : '复制'}
+                            </button>
+                        </div>
+                        <button onClick={onClose} className="w-full py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">关闭</button>
+                    </div>
+                </div>
+            );
+        }
+        
+        function Footer() {
+            return (
+                <div className="text-center py-6 fade-in-up delay-500">
+                    <p className="text-white/30 text-xs">本系统仅限核心老板查看</p>
+                    <p className="text-white/20 text-xs mt-1">© 2026 Overwatch Booking System</p>
+                </div>
+            );
+        }
+        
+        function App() {
+            const [player, setPlayer] = useState(mockData.player);
+            const [playingItem, setPlayingItem] = useState(null);
+            const [isContactOpen, setIsContactOpen] = useState(false);
+            
+            const handleMoodChange = (newMood) => setPlayer({ ...player, mood: newMood });
+            
+            const handleBook = (id) => {
+                console.log('预约:', id);
+                setIsContactOpen(true);
+            };
+            
+            return (
+                <div className="min-h-screen bg-[#0a0a0f] px-4 py-4 max-w-md mx-auto">
+                    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-0 left-1/4 w-64 h-64 bg-[#0A84FF]/10 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
+                    </div>
+                    
+                    <div className="relative z-10">
+                        <VideoHeader />
+                        <ProfileCard player={player} onMoodChange={handleMoodChange} />
+                        <PriceList prices={mockData.prices} onBook={handleBook} status={player.status} />
+                        <Portfolio items={mockData.portfolio} onPlay={setPlayingItem} />
+                        <FeatureToggles features={mockData.features} />
+                        
+                        <div className="fade-in-up delay-500">
+                            <button 
+                                onClick={() => setIsContactOpen(true)}
+                                className="w-full py-4 bg-gradient-to-r from-[#0A84FF] to-[#0066CC] text-white rounded-xl font-bold text-lg glow-blue btn-glow"
+                            >
+                                💬 联系老板确认
+                            </button>
+                        </div>
+                        
+                        <Footer />
+                    </div>
+                    
+                    <VideoLightbox item={playingItem} onClose={() => setPlayingItem(null)} />
+                    <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+                </div>
+            );
+        }
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
