@@ -65,15 +65,16 @@
                         if (!response.ok) throw new Error('Network response was not ok');
                         const data = await response.json();
                         
+                        console.log('Loaded data:', data);
+                        console.log('Slots:', data.slots);
+                        
                         setStatus(data.status || 'online');
                         setMood(data.mood || '手感爆热，带飞！');
                         setSlots(data.slots || []);
                         setBookings(data.bookings || []);
-                        console.log('Data loaded:', data);
                     } catch (error) {
                         console.error('Load error:', error);
                         if (retryCount < 3) {
-                            // 重试
                             setTimeout(() => loadData(retryCount + 1), 1000);
                             return;
                         }
@@ -86,6 +87,11 @@
                 loadData();
             }, []);
             
+            // 数据变化时打印日志
+            useEffect(() => {
+                console.log('Slots updated:', slots);
+            }, [slots]);
+            
             const year = viewDate.getFullYear(), month = viewDate.getMonth();
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -93,7 +99,11 @@
             for (let i = 0; i < firstDay; i++) days.push(null);
             for (let i = 1; i <= daysInMonth; i++) days.push(i);
             
-            const getDaySlots = (day) => day ? slots.filter(s => s.date === `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`) : [];
+            const getDaySlots = (day) => {
+                if (!day || !slots || slots.length === 0) return [];
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                return slots.filter(s => s.date === dateStr);
+            };
             
             const addSlot = () => {
                 const start = parseInt(startTime), end = parseInt(endTime);
