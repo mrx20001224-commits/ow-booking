@@ -428,15 +428,26 @@
             const handleSave = () => {
                 setIsSyncing(true);
                 
-                // 模拟同步到服务器
+                // 保存到 localStorage
+                const dataToSave = {
+                    status,
+                    mood,
+                    bookings: bookings,
+                    updatedAt: new Date().toISOString()
+                };
+                localStorage.setItem('ow_booking_status', JSON.stringify(dataToSave));
+                
+                // 触发 storage 事件让其他标签页同步
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'ow_booking_status',
+                    newValue: JSON.stringify(dataToSave)
+                }));
+                
                 setTimeout(() => {
                     setIsSyncing(false);
                     setShowToast(true);
                     setTimeout(() => setShowToast(false), 2000);
-                    
-                    // 保存到 localStorage（实际应使用 Supabase）
-                    localStorage.setItem('ow_booking_status', JSON.stringify({ status, mood, bookings }));
-                }, 800);
+                }, 500);
             };
             
             return (
