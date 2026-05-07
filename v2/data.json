@@ -3,86 +3,60 @@
   "mood": "手感爆热，带飞！",
   "slots": [
     {
-      "date": "2026-05-08",
+      "date": "2026-05-11",
+      "time_slot": "09:00-10:00",
+      "is_available": true,
+      "locked": false
+    },
+    {
+      "date": "2026-05-11",
+      "time_slot": "10:00-11:00",
+      "is_available": true,
+      "locked": false
+    },
+    {
+      "date": "2026-05-11",
+      "time_slot": "11:00-12:00",
+      "is_available": true,
+      "locked": false
+    },
+    {
+      "date": "2026-05-11",
+      "time_slot": "12:00-13:00",
+      "is_available": true,
+      "locked": false
+    },
+    {
+      "date": "2026-05-11",
+      "time_slot": "13:00-14:00",
+      "is_available": true,
+      "locked": false
+    },
+    {
+      "date": "2026-05-11",
       "time_slot": "14:00-15:00",
-      "is_available": true
+      "is_available": true,
+      "locked": false
     },
     {
-      "date": "2026-05-08",
+      "date": "2026-05-11",
       "time_slot": "15:00-16:00",
-      "is_available": true
+      "is_available": true,
+      "locked": false
     },
     {
-      "date": "2026-05-08",
+      "date": "2026-05-11",
       "time_slot": "16:00-17:00",
-      "is_available": true
+      "is_available": true,
+      "locked": false
     },
     {
-      "date": "2026-05-08",
+      "date": "2026-05-11",
       "time_slot": "17:00-18:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-09",
-      "time_slot": "14:00-15:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-09",
-      "time_slot": "15:00-16:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-09",
-      "time_slot": "16:00-17:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-09",
-      "time_slot": "17:00-18:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-15",
-      "time_slot": "14:00-15:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-15",
-      "time_slot": "15:00-16:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-15",
-      "time_slot": "16:00-17:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-15",
-      "time_slot": "17:00-18:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-30",
-      "time_slot": "14:00-15:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-30",
-      "time_slot": "15:00-16:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-30",
-      "time_slot": "16:00-17:00",
-      "is_available": true
-    },
-    {
-      "date": "2026-05-30",
-      "time_slot": "17:00-18:00",
-      "is_available": true
+      "is_available": true,
+      "locked": false
     }
   ],
   "bookings": [],
-  "updated_at": "2026-05-07T18:57:07.160Z"
+  "updated_at": "2026-05-07T18:59:11.583Z"
 }
