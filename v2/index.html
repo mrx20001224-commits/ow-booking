@@ -93,13 +93,40 @@
                 else setSelectedSlots([...selectedSlots, slot]);
             };
             
-            const handleConfirm = () => {
+            const handleConfirm = async () => {
                 if (selectedSlots.length === 0) { alert('请至少选择一个时间段'); return; }
                 if (!customerName || !customerContact) { alert('请填写姓名和联系方式'); return; }
-                const times = selectedSlots.map(s => `${s.date} ${s.time_slot}`).join(', ');
-                alert(`预约成功！\n段位：${selectedPrice.rank}\n价格：${selectedPrice.price}r/h\n时间：${times}\n\n请添加微信联系陪玩确认`);
-                onClose();
-                setSelectedSlots([]); setCustomerName(''); setCustomerContact(''); setNotes('');
+                
+                // 提交预约到 Formspree（会发送邮件通知）
+                const bookingData = {
+                    customer_name: customerName,
+                    customer_contact: customerContact,
+                    price_rank: selectedPrice.rank,
+                    price_amount: selectedPrice.price,
+                    slots: selectedSlots,
+                    notes: notes,
+                    _subject: `新预约：${customerName} - ${selectedPrice.rank}`,
+                    _replyto: customerContact
+                };
+                
+                try {
+                    const response = await fetch('https://formspree.io/f/xnqevwre', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(bookingData)
+                    });
+                    
+                    if (response.ok) {
+                        const times = selectedSlots.map(s => `${s.date} ${s.time_slot}`).join(', ');
+                        alert(`预约成功！\n段位：${selectedPrice.rank}\n价格：${selectedPrice.price}r/h\n时间：${times}\n\n请添加微信联系陪玩确认`);
+                        onClose();
+                        setSelectedSlots([]); setCustomerName(''); setCustomerContact(''); setNotes('');
+                    } else {
+                        alert('预约提交失败，请重试');
+                    }
+                } catch (e) {
+                    alert('预约提交失败：' + e.message);
+                }
             };
             
             return <div className={`modal-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}><div className="glass-card rounded-2xl p-5 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}><h3 className="text-white text-xl font-bold mb-1">预约：{selectedPrice.rank}</h3><p className="text-blue-400 text-sm mb-4">{selectedPrice.price}r/h · 可多选时间段</p>
