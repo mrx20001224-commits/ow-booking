@@ -167,15 +167,22 @@
                 const loadData = async () => {
                     setIsSyncing(true);
                     
-                    // 加载可预约时间段
-                    const { data: slotsData } = await supabase.from('available_slots').select('*').eq('is_available', true);
-                    if (slotsData) setSlots(slotsData);
+                    try {
+                        // 加载可预约时间段
+                        const { data: slotsData, error: slotsError } = await supabase.from('available_slots').select('*').eq('is_available', true);
+                        if (slotsError) console.log('Slots error:', slotsError);
+                        else if (slotsData) setSlots(slotsData);
+                        
+                        // 加载陪玩状态
+                        const { data: statusData, error: statusError } = await supabase.from('player_status').select('*').single();
+                        if (statusError) console.log('Status error:', statusError);
+                        else if (statusData) { setStatus(statusData.status); setMood(statusData.mood); }
+                        
+                        setIsConnected(true);
+                    } catch (e) {
+                        console.error('Load error:', e);
+                    }
                     
-                    // 加载陪玩状态
-                    const { data: statusData } = await supabase.from('player_status').select('*').single();
-                    if (statusData) { setStatus(statusData.status); setMood(statusData.mood); }
-                    
-                    setIsConnected(true);
                     setIsSyncing(false);
                 };
                 
