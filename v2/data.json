@@ -1,5 +1,5 @@
 {
-  "status": "busy",
+  "status": "online",
   "mood": "手感爆热，带飞！",
   "slots": [
     {
@@ -84,5 +84,5 @@
     }
   ],
   "bookings": [],
-  "updated_at": "2026-05-07T18:54:50.741Z"
+  "updated_at": "2026-05-07T18:57:07.160Z"
 }
