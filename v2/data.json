@@ -1,0 +1,12 @@
+{
+  "status": "online",
+  "mood": "手感爆热，带飞！",
+  "slots": [
+    { "date": "2026-05-08", "time_slot": "14:00-15:00", "is_available": true },
+    { "date": "2026-05-08", "time_slot": "15:00-16:00", "is_available": true },
+    { "date": "2026-05-08", "time_slot": "16:00-17:00", "is_available": true },
+    { "date": "2026-05-08", "time_slot": "17:00-18:00", "is_available": true }
+  ],
+  "bookings": [],
+  "updated_at": "2026-05-08T00:00:00Z"
+}
