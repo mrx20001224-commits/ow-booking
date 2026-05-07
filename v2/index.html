@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -26,8 +25,6 @@
         .time-slot-btn.selected { background: #3b82f6; border-color: #3b82f6; color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .sync-indicator { position: fixed; top: 10px; right: 10px; padding: 6px 12px; background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); border-radius: 20px; font-size: 11px; color: #4ade80; display: flex; align-items: center; gap: 6px; z-index: 50; }
-        .sync-indicator.syncing { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
         .btn-primary { background: linear-gradient(90deg, #059669 0%, #10b981 50%, #059669 100%); background-size: 200% 100%; transition: all 0.3s ease; }
         .btn-primary:hover { background-position: 100% 0; }
     </style>
@@ -37,12 +34,9 @@
     
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const { createClient } = supabase;
         
-        // Supabase 配置
-        const SUPABASE_URL = 'https://dlvuucolnpgkxfwdwxfc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_76KuJRcR_mKGZtpG_mEdhg_pYIGTo7V';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // GitHub raw 数据 URL
+        const DATA_URL = 'https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/v2/data.json';
         
         const mockData = {
             player: { name: "微信课索", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop", title: "国服挑战者 / 16年入坑老登 / 5千小时+" },
@@ -59,10 +53,6 @@
                 { id: 2, title: "艾什 - 中城五杀", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop", videoUrl: "https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/videos/ashe-teamwipe-5k.mp4" },
             ],
         };
-        
-        function SyncIndicator({ isConnected, isSyncing }) {
-            return <div className={`sync-indicator ${isSyncing ? 'syncing' : ''}`}><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>{isSyncing ? '同步中...' : isConnected ? '实时同步' : '离线'}</div>;
-        }
         
         function Header({ mood }) {
             return <div className="relative w-full h-48 overflow-hidden fade-in-up"><img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop" alt="Overwatch" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0d1117]"></div><div className="absolute bottom-4 left-4 right-4"><div className="glass-card rounded-xl p-4 flex items-center gap-3"><img src={mockData.player.avatar} alt="avatar" className="w-14 h-14 rounded-full border-2 border-blue-500/50" /><div className="flex-1"><h1 className="text-white font-bold text-lg">【守望先锋 Overwatch】</h1><p className="text-blue-400 text-sm">技术&娱乐陪 🥣</p><p className="text-white/60 text-xs mt-0.5">{mockData.player.title}</p><p className="text-green-400 text-xs">今日心情: {mood}</p></div></div></div></div>;
@@ -86,8 +76,7 @@
             return <div className="mb-4 fade-in-up delay-300"><h3 className="text-white font-semibold mb-3 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>预约价格表单</h3><div className="space-y-2">{mockData.prices.map((item) => <div key={item.id} className="price-tag rounded-xl p-3 flex items-center justify-between"><div className="flex items-center gap-2"><span className="text-lg">{item.icon}</span><div><span className="text-white font-medium">{item.rank}</span>{item.note && <span className="text-white/40 text-xs ml-1">{item.note}</span>}</div></div><div className="flex items-center gap-3"><span className="text-white font-bold">{item.price}r/h</span><button onClick={() => onBook(item)} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-500/80 text-white hover:bg-blue-500 transition-all">点此预约</button></div></div>)}</div></div>;
         }
         
-        // 预约弹窗
-        function BookingModal({ isOpen, onClose, selectedPrice, slots, onSubmit }) {
+        function BookingModal({ isOpen, onClose, selectedPrice, slots }) {
             const [selectedSlots, setSelectedSlots] = useState([]);
             const [customerName, setCustomerName] = useState('');
             const [customerContact, setCustomerContact] = useState('');
@@ -95,140 +84,61 @@
             
             if (!isOpen || !selectedPrice) return null;
             
-            // 按日期分组
-            const slotsByDate = slots.reduce((acc, slot) => {
-                if (!acc[slot.date]) acc[slot.date] = [];
-                acc[slot.date].push(slot);
-                return acc;
-            }, {});
+            const availableSlots = slots.filter(s => s.is_available);
+            const slotsByDate = availableSlots.reduce((acc, slot) => { if (!acc[slot.date]) acc[slot.date] = []; acc[slot.date].push(slot); return acc; }, {});
             
             const toggleSlot = (slot) => {
-                const exists = selectedSlots.find(s => s.id === slot.id);
-                if (exists) {
-                    setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id));
-                } else {
-                    setSelectedSlots([...selectedSlots, slot]);
-                }
+                const exists = selectedSlots.find(s => s.date === slot.date && s.time_slot === slot.time_slot);
+                if (exists) setSelectedSlots(selectedSlots.filter(s => !(s.date === slot.date && s.time_slot === slot.time_slot)));
+                else setSelectedSlots([...selectedSlots, slot]);
             };
             
-            const handleConfirm = async () => {
+            const handleConfirm = () => {
                 if (selectedSlots.length === 0) { alert('请至少选择一个时间段'); return; }
                 if (!customerName || !customerContact) { alert('请填写姓名和联系方式'); return; }
-                
-                await onSubmit({
-                    slots: selectedSlots,
-                    customerName,
-                    customerContact,
-                    priceRank: selectedPrice.rank,
-                    priceAmount: selectedPrice.price,
-                    notes
-                });
-                
-                // 重置
-                setSelectedSlots([]);
-                setCustomerName('');
-                setCustomerContact('');
-                setNotes('');
+                const times = selectedSlots.map(s => `${s.date} ${s.time_slot}`).join(', ');
+                alert(`预约成功！\n段位：${selectedPrice.rank}\n价格：${selectedPrice.price}r/h\n时间：${times}\n\n请添加微信联系陪玩确认`);
                 onClose();
+                setSelectedSlots([]); setCustomerName(''); setCustomerContact(''); setNotes('');
             };
             
             return <div className={`modal-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}><div className="glass-card rounded-2xl p-5 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}><h3 className="text-white text-xl font-bold mb-1">预约：{selectedPrice.rank}</h3><p className="text-blue-400 text-sm mb-4">{selectedPrice.price}r/h · 可多选时间段</p>
-                
-                {/* 客户信息 */}
                 <div className="mb-4 space-y-3"><input type="text" placeholder="您的称呼" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm" /><input type="text" placeholder="微信号 / 手机号" value={customerContact} onChange={(e) => setCustomerContact(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm" /><textarea placeholder="备注（可选）" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm h-20 resize-none" /></div>
-                
-                {/* 选择时间段 */}
-                <div className="mb-4"><p className="text-white/60 text-sm mb-2">选择时间（已选{selectedSlots.length}个时段）</p>{Object.entries(slotsByDate).map(([date, daySlots]) => <div key={date} className="mb-3"><p className="text-white text-xs mb-1">{date}</p><div className="grid grid-cols-3 gap-2">{daySlots.map((slot) => <button key={slot.id} onClick={() => toggleSlot(slot)} className={`time-slot-btn ${selectedSlots.find(s => s.id === slot.id) ? 'selected' : 'available'}`}>{slot.time_slot}</button>)}</div></div>)}</div>
-                
-                {/* 收款码 */}
-                {selectedSlots.length > 0 && (
-                    <div className="mb-4 p-3 bg-white/5 rounded-xl">
-                        <p className="text-white/60 text-sm mb-2">扫码支付定金</p>
-                        <img src="https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/images/wechat-pay.jpg" alt="微信支付" className="w-32 h-32 mx-auto rounded-lg" />
-                        <p className="text-white/40 text-xs text-center mt-1">预约后请支付定金</p>
-                    </div>
-                )}
-                
-                <button onClick={handleConfirm} disabled={selectedSlots.length === 0 || !customerName || !customerContact} className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${selectedSlots.length > 0 && customerName && customerContact ? 'btn-primary text-white' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}>确认预约</button><button onClick={onClose} className="w-full py-3 mt-2 bg-white/5 text-white/60 rounded-xl hover:bg-white/10 transition-colors">取消</button></div></div>;
+                <div className="mb-4"><p className="text-white/60 text-sm mb-2">选择时间（已选{selectedSlots.length}个时段）</p>{Object.entries(slotsByDate).length === 0 ? <p className="text-white/40 text-sm">暂无可用时段</p> : Object.entries(slotsByDate).map(([date, daySlots]) => <div key={date} className="mb-3"><p className="text-white text-xs mb-1">{date}</p><div className="grid grid-cols-3 gap-2">{daySlots.map((slot, idx) => <button key={idx} onClick={() => toggleSlot(slot)} className={`time-slot-btn ${selectedSlots.find(s => s.date === slot.date && s.time_slot === slot.time_slot) ? 'selected' : 'available'}`}>{slot.time_slot}</button>)}</div></div>)}</div>
+                {selectedSlots.length > 0 && <div className="mb-4 p-3 bg-white/5 rounded-xl"><p className="text-white/60 text-sm mb-2">扫码支付定金</p><img src="https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/images/wechat-pay.jpg" alt="微信支付" className="w-32 h-32 mx-auto rounded-lg" /><p className="text-white/40 text-xs text-center mt-1">预约后请支付定金</p></div>}
+                <button onClick={handleConfirm} disabled={selectedSlots.length === 0 || !customerName || !customerContact} className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${selectedSlots.length > 0 && customerName && customerContact ? 'btn-primary text-white' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}>确认预约 ({selectedSlots.length}个时段)</button><button onClick={onClose} className="w-full py-3 mt-2 bg-white/5 text-white/60 rounded-xl hover:bg-white/10 transition-colors">取消</button></div></div>;
         }
         
         function App() {
             const [isBookingOpen, setIsBookingOpen] = useState(false);
             const [selectedPrice, setSelectedPrice] = useState(null);
             const [playingVideo, setPlayingVideo] = useState(null);
-            const [slots, setSlots] = useState([]);
-            const [status, setStatus] = useState('online');
-            const [mood, setMood] = useState('手感爆热，带飞！');
-            const [isConnected, setIsConnected] = useState(false);
-            const [isSyncing, setIsSyncing] = useState(false);
+            const [data, setData] = useState({ status: 'online', mood: '手感爆热，带飞！', slots: [], bookings: [] });
+            const [isLoading, setIsLoading] = useState(true);
             
-            // 从 Supabase 加载数据
-            useEffect(() => {
-                const loadData = async () => {
-                    setIsSyncing(true);
-                    
-                    try {
-                        // 加载可预约时间段
-                        const { data: slotsData, error: slotsError } = await supabase.from('available_slots').select('*').eq('is_available', true);
-                        if (slotsError) console.log('Slots error:', slotsError);
-                        else if (slotsData) setSlots(slotsData);
-                        
-                        // 加载陪玩状态
-                        const { data: statusData, error: statusError } = await supabase.from('player_status').select('*').single();
-                        if (statusError) console.log('Status error:', statusError);
-                        else if (statusData) { setStatus(statusData.status); setMood(statusData.mood); }
-                        
-                        setIsConnected(true);
-                    } catch (e) {
-                        console.error('Load error:', e);
+            // 从 GitHub 加载数据
+            const loadData = async () => {
+                try {
+                    const response = await fetch(DATA_URL + '?t=' + Date.now());
+                    if (response.ok) {
+                        const json = await response.json();
+                        setData(json);
                     }
-                    
-                    setIsSyncing(false);
-                };
-                
+                } catch (e) { console.error('Load error:', e); }
+                setIsLoading(false);
+            };
+            
+            useEffect(() => {
                 loadData();
-                
-                // 订阅实时更新
-                const slotsSubscription = supabase.channel('slots').on('postgres_changes', { event: '*', schema: 'public', table: 'available_slots' }, (payload) => {
-                    setIsSyncing(true);
-                    loadData();
-                    setTimeout(() => setIsSyncing(false), 500);
-                }).subscribe();
-                
-                const statusSubscription = supabase.channel('status').on('postgres_changes', { event: '*', schema: 'public', table: 'player_status' }, (payload) => {
-                    setIsSyncing(true);
-                    loadData();
-                    setTimeout(() => setIsSyncing(false), 500);
-                }).subscribe();
-                
-                return () => {
-                    slotsSubscription.unsubscribe();
-                    statusSubscription.unsubscribe();
-                };
+                const interval = setInterval(loadData, 5000); // 每5秒刷新
+                return () => clearInterval(interval);
             }, []);
             
             const handleBook = (price) => { setSelectedPrice(price); setIsBookingOpen(true); };
             
-            const handleBookingSubmit = async (bookingData) => {
-                // 创建预约记录
-                for (const slot of bookingData.slots) {
-                    await supabase.from('bookings').insert({
-                        slot_id: slot.id,
-                        customer_name: bookingData.customerName,
-                        customer_contact: bookingData.customerContact,
-                        price_rank: bookingData.priceRank,
-                        price_amount: bookingData.priceAmount,
-                        notes: bookingData.notes
-                    });
-                    
-                    // 标记时间段为已预约
-                    await supabase.from('available_slots').update({ is_available: false }).eq('id', slot.id);
-                }
-                
-                alert('预约成功！请等待陪玩确认');
-            };
+            if (isLoading) return <div className="min-h-screen flex items-center justify-center text-white">加载中...</div>;
             
-            return <div className="min-h-screen pb-6"><SyncIndicator isConnected={isConnected} isSyncing={isSyncing} /><Header mood={mood} /><div className="px-4 -mt-2"><StatusCard status={status} /><Portfolio onPlay={setPlayingVideo} /><PriceList onBook={handleBook} /><div className="fade-in-up delay-400"><button onClick={() => setIsBookingOpen(true)} className="w-full btn-primary py-4 rounded-xl text-white font-bold text-lg">联系老板确认</button></div><div className="text-center py-6"><p className="text-white/30 text-xs">本系统仅限核心老板查看</p></div></div><BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} slots={slots} onSubmit={handleBookingSubmit} /><VideoModal isOpen={!!playingVideo} onClose={() => setPlayingVideo(null)} video={playingVideo} /></div>;
+            return <div className="min-h-screen pb-6"><Header mood={data.mood} /><div className="px-4 -mt-2"><StatusCard status={data.status} /><Portfolio onPlay={setPlayingVideo} /><PriceList onBook={handleBook} /><div className="fade-in-up delay-400"><button onClick={() => setIsBookingOpen(true)} className="w-full btn-primary py-4 rounded-xl text-white font-bold text-lg">联系老板确认</button></div><div className="text-center py-6"><p className="text-white/30 text-xs">本系统仅限核心老板查看</p></div></div><BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} slots={data.slots} /><VideoModal isOpen={!!playingVideo} onClose={() => setPlayingVideo(null)} video={playingVideo} /></div>;
         }
         
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
