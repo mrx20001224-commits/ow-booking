@@ -6,21 +6,12 @@
     <meta name="description" content="守望先锋陪玩实时预约看板 - 专业电竞陪玩服务">
     <meta name="theme-color" content="#0a0a0f">
     
-    <!-- 微信分享 -->
-    <meta itemprop="name" content="🎮 守望先锋技术&娱乐陪">
-    <meta itemprop="description" content="国服挑战者 | 16年入坑老登 | 5千小时+">
-    <meta itemprop="image" content="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=300&fit=crop">
-    <meta property="og:title" content="🎮 守望先锋技术&娱乐陪">
-    <meta property="og:description" content="国服挑战者 | 16年入坑老登 | 5千小时+">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=300&fit=crop">
-    
     <title>守望先锋 Overwatch - 技术&娱乐陪</title>
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.2.0/lunar.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -38,12 +29,6 @@
             border: 1px solid rgba(48, 54, 61, 0.6);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
-        
-        .glow-green { box-shadow: 0 0 20px rgba(35, 197, 94, 0.4); }
-        .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-        
-        @keyframes breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } }
-        .breathe { animation: breathe 2s ease-in-out infinite; }
         
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { opacity: 0; animation: fadeInUp 0.6s ease-out forwards; }
@@ -67,35 +52,36 @@
         .price-tag {
             background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
             border: 1px solid rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
         }
-        .price-tag:hover { border-color: rgba(59, 130, 246, 0.8); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
         
-        .toggle-switch { position: relative; width: 44px; height: 24px; background: rgba(48, 54, 61, 0.8); border-radius: 12px; cursor: pointer; transition: all 0.3s; }
-        .toggle-switch.active { background: #3b82f6; }
-        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        .toggle-switch.active::after { left: 22px; }
-        
-        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; position: relative; }
-        .calendar-day:hover { background: rgba(255, 255, 255, 0.05); }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .calendar-day:hover { background: rgba(255, 255, 255, 0.1); }
         .calendar-day.available { background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); }
         .calendar-day.available .day-num { color: #4ade80; }
-        .calendar-day.busy { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); }
-        .calendar-day.busy .day-num { color: #f87171; }
         .calendar-day .lunar { font-size: 9px; color: rgba(255, 255, 255, 0.4); margin-top: 1px; }
         
         .time-slot-btn {
-            padding: 10px 16px;
+            padding: 12px 8px;
             border-radius: 10px;
             border: 1px solid rgba(48, 54, 61, 0.6);
             background: rgba(22, 27, 34, 0.6);
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
         }
-        .time-slot-btn:hover { background: rgba(255, 255, 255, 0.1); }
         .time-slot-btn.available {
             background: rgba(35, 197, 94, 0.2);
             border-color: rgba(35, 197, 94, 0.5);
@@ -107,32 +93,63 @@
             color: white;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
         }
+        .time-slot-btn.multi-selected {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-color: #8b5cf6;
+            color: white;
+        }
         
-        .horizontal-scroll { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 12px; }
-        .horizontal-scroll::-webkit-scrollbar { display: none; }
-        .scroll-item { scroll-snap-align: start; flex-shrink: 0; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .sync-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: rgba(35, 197, 94, 0.2);
+            border: 1px solid rgba(35, 197, 94, 0.4);
+            border-radius: 20px;
+            font-size: 11px;
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 50;
+        }
+        .sync-indicator.syncing {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         .btn-primary {
             background: linear-gradient(90deg, #059669 0%, #10b981 50%, #059669 100%);
             background-size: 200% 100%;
             transition: all 0.3s ease;
         }
-        .btn-primary:hover { background-position: 100% 0; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
-        
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .sync-indicator { position: fixed; top: 10px; right: 10px; padding: 6px 12px; background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); border-radius: 20px; font-size: 11px; color: #4ade80; display: flex; align-items: center; gap: 6px; z-index: 50; }
-        .sync-indicator.syncing { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
-        .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        .rank-bronze { color: #cd7f32; }
-        .rank-silver { color: #c0c0c0; }
-        .rank-gold { color: #ffd700; }
-        .rank-platinum { color: #3eb489; }
-        .rank-diamond { color: #b9f2ff; }
-        .rank-master { color: #ff8c00; }
+        .btn-primary:hover { background-position: 100% 0; }
     </style>
 </head>
 <body>
@@ -149,40 +166,13 @@
                 mood: "手感爆热，带飞！"
             },
             prices: [
-                { id: 1, rank: "快速比赛", price: 25, icon: "⚡", color: "text-gray-400" },
-                { id: 2, rank: "青铜白银黄金", price: 35, icon: "🥉", color: "rank-bronze", note: "(根据分数)" },
-                { id: 3, rank: "角斗领域下三段", price: 45, icon: "⚔️", color: "text-orange-400" },
-                { id: 4, rank: "白金段位", price: 55, icon: "💎", color: "rank-platinum" },
-                { id: 5, rank: "钻石段位", price: 70, icon: "💎", color: "rank-diamond" },
-                { id: 6, rank: "大师段位", price: 90, icon: "👑", color: "rank-master" },
+                { id: 1, rank: "快速比赛", price: 25, icon: "⚡" },
+                { id: 2, rank: "青铜白银黄金", price: 35, icon: "🥉", note: "(根据分数)" },
+                { id: 3, rank: "角斗领域下三段", price: 45, icon: "⚔️" },
+                { id: 4, rank: "白金段位", price: 55, icon: "💎" },
+                { id: 5, rank: "钻石段位", price: 70, icon: "💎" },
+                { id: 6, rank: "大师段位", price: 90, icon: "👑" },
             ],
-            portfolio: [
-                { id: 1, title: "坦克位 - 大锤五杀", thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=200&fit=crop" },
-                { id: 2, title: "输出位 - 源氏拔刀", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=300&h=200&fit=crop" },
-                { id: 3, title: "输出位 - 源氏", thumbnail: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=300&h=200&fit=crop" },
-            ],
-            features: [
-                { id: "cantonese", label: "可提供粤语交流", enabled: true },
-                { id: "review", label: "可提供复盘等服务", enabled: true },
-                { id: "custom", label: "竞速&定制下单", enabled: false },
-            ],
-        };
-        
-        const getLunarDate = (year, month, day) => {
-            try {
-                if (typeof Lunar !== 'undefined') {
-                    const lunar = Lunar.fromYmd(year, month, day);
-                    const dayName = lunar.getDayInChinese();
-                    if (dayName === '初一') return lunar.getMonthInChinese() + '月';
-                    return dayName;
-                }
-            } catch (e) {}
-            return '';
-        };
-        
-        const getHoliday = (month, day) => {
-            const holidays = { '1-1': '元旦', '5-1': '劳动节', '10-1': '国庆节', '12-25': '圣诞' };
-            return holidays[`${month}-${day}`] || '';
         };
         
         function SyncIndicator({ isConnected, isSyncing }) {
@@ -233,7 +223,7 @@
             );
         }
         
-        function Calendar({ bookings }) {
+        function Calendar({ slots }) {
             const [viewDate, setViewDate] = useState(new Date());
             const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
             const year = viewDate.getFullYear(), month = viewDate.getMonth();
@@ -243,11 +233,10 @@
             for (let i = 0; i < firstDay; i++) days.push(null);
             for (let i = 1; i <= daysInMonth; i++) days.push(i);
             
-            const getDayStatus = (day) => {
-                if (!day) return null;
+            const hasSlots = (day) => {
+                if (!day) return false;
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayBookings = bookings.filter(b => b.date === dateStr);
-                return { hasAvailable: dayBookings.some(b => b.status === 'available'), hasBusy: dayBookings.some(b => b.status === 'busy') };
+                return slots.some(s => s.date === dateStr);
             };
             
             return (
@@ -255,8 +244,8 @@
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-white font-semibold">{year}年{month + 1}月</h3>
                         <div className="flex gap-2">
-                            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10">&lt;</button>
-                            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10">&gt;</button>
+                            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&lt;</button>
+                            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&gt;</button>
                         </div>
                     </div>
                     <div className="grid grid-cols-7 gap-1 mb-2">
@@ -264,21 +253,18 @@
                     </div>
                     <div className="grid grid-cols-7 gap-1">
                         {days.map((day, idx) => {
-                            if (!day) return <div key={idx} className="calendar-day"></div>;
-                            const status = getDayStatus(day);
-                            const lunar = getLunarDate(year, month + 1, day);
-                            const holiday = getHoliday(month + 1, day);
+                            if (!day) return <div key={idx} className="calendar-day" style={{background:'transparent'}}></div>;
+                            const available = hasSlots(day);
                             return (
-                                <div key={day} className={`calendar-day ${status?.hasAvailable ? 'available' : ''} ${status?.hasBusy ? 'busy' : ''}`}>
+                                <div key={day} className={`calendar-day ${available ? 'available' : ''}`}>
                                     <span className="day-num">{day}</span>
-                                    <span className="lunar">{holiday || lunar}</span>
+                                    {available && <span className="text-[8px] text-green-400">可约</span>}
                                 </div>
                             );
                         })}
                     </div>
                     <div className="flex items-center gap-4 mt-3 text-xs">
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-500/30 border border-green-500/50"></div><span className="text-white/60">可预约</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-red-500/30 border border-red-500/50"></div><span className="text-white/60">已约满</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-500/30 border border-green-500/50"></div><span className="text-white/60">有可用时段</span></div>
                     </div>
                 </div>
             );
@@ -292,7 +278,7 @@
                         {mockData.prices.map((item) => (
                             <div key={item.id} className="price-tag rounded-xl p-3 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-lg ${item.color}`}>{item.icon}</span>
+                                    <span className="text-lg">{item.icon}</span>
                                     <div><span className="text-white font-medium">{item.rank}</span>{item.note && <span className="text-white/40 text-xs ml-1">{item.note}</span>}</div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -306,50 +292,10 @@
             );
         }
         
-        function Portfolio() {
-            return (
-                <div className="mb-4 fade-in-up delay-400">
-                    <h3 className="text-white font-semibold mb-3 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>高光时刻 / 复盘作品集</h3>
-                    <div className="horizontal-scroll -mx-4 px-4">
-                        {mockData.portfolio.map((item) => (
-                            <div key={item.id} className="scroll-item w-36">
-                                <div className="relative rounded-xl overflow-hidden aspect-video bg-gray-800 group cursor-pointer">
-                                    <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                                            <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2"><p className="text-white text-xs truncate">{item.title}</p></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-        
-        function Features() {
-            const [features, setFeatures] = useState(mockData.features);
-            const toggle = (id) => setFeatures(features.map(f => f.id === id ? { ...f, enabled: !f.enabled } : f));
-            return (
-                <div className="glass-card rounded-2xl p-4 mb-4 fade-in-up delay-500">
-                    <div className="space-y-3">
-                        {features.map((feature) => (
-                            <div key={feature.id} className="flex items-center justify-between">
-                                <span className="text-white/80 text-sm">{feature.label}</span>
-                                <div className={`toggle-switch ${feature.enabled ? 'active' : ''}`} onClick={() => toggle(feature.id)}></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-        
-        // 预约弹窗 - 选择时间段
-        function BookingModal({ isOpen, onClose, selectedPrice, bookings }) {
+        // 预约弹窗 - 24小时制多选
+        function BookingModal({ isOpen, onClose, selectedPrice, slots }) {
             const [selectedDate, setSelectedDate] = useState(null);
-            const [selectedTime, setSelectedTime] = useState(null);
+            const [selectedSlots, setSelectedSlots] = useState([]);
             const [viewDate, setViewDate] = useState(new Date());
             
             if (!isOpen || !selectedPrice) return null;
@@ -361,28 +307,41 @@
             for (let i = 0; i < firstDay; i++) days.push(null);
             for (let i = 1; i <= daysInMonth; i++) days.push(i);
             
-            const getDayBookings = (day) => {
+            const getDateStr = (day) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            const getDaySlots = (day) => {
                 if (!day) return [];
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                return bookings.filter(b => b.date === dateStr && b.status === 'available');
+                return slots.filter(s => s.date === getDateStr(day));
             };
             
-            const availableTimes = selectedDate ? getDayBookings(selectedDate).map(b => b.time_slot || b.time) : [];
-            
-            const handleConfirm = () => {
-                if (selectedDate && selectedTime) {
-                    alert(`预约成功！\n段位：${selectedPrice.rank}\n价格：${selectedPrice.price}r/h\n日期：${month + 1}月${selectedDate}日\n时间：${selectedTime}`);
-                    onClose();
-                    setSelectedDate(null);
-                    setSelectedTime(null);
+            const toggleSlot = (slot) => {
+                const key = `${slot.date}_${slot.time_slot}`;
+                if (selectedSlots.some(s => `${s.date}_${s.time_slot}` === key)) {
+                    setSelectedSlots(selectedSlots.filter(s => `${s.date}_${s.time_slot}` !== key));
+                } else {
+                    setSelectedSlots([...selectedSlots, slot]);
                 }
             };
             
+            const handleConfirm = () => {
+                if (selectedSlots.length === 0) {
+                    alert('请至少选择一个时间段');
+                    return;
+                }
+                const times = selectedSlots.map(s => s.time_slot).join(', ');
+                alert(`预约成功！\n段位：${selectedPrice.rank}\n价格：${selectedPrice.price}r/h\n时间：${times}`);
+                onClose();
+                setSelectedDate(null);
+                setSelectedSlots([]);
+            };
+            
+            const daySlots = selectedDate ? getDaySlots(selectedDate) : [];
+            
             return (
                 <div className={`modal-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}>
-                    <div className="glass-card rounded-2xl p-5 max-w-sm w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-white text-xl font-bold mb-2">预约：{selectedPrice.rank}</h3>
-                        <p className="text-blue-400 text-sm mb-4">{selectedPrice.price}r/h</p>
+                    <div className="glass-card rounded-2xl p-5 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-white text-xl font-bold mb-1">预约：{selectedPrice.rank}</h3>
+                        <p className="text-blue-400 text-sm mb-4">{selectedPrice.price}r/h · 可多选时间段</p>
                         
                         <div className="mb-4">
                             <div className="flex items-center justify-between mb-3">
@@ -397,22 +356,18 @@
                                 {['日','一','二','三','四','五','六'].map(d => <div key={d} className="text-center text-white/40 text-xs py-1">{d}</div>)}
                                 {days.map((day, idx) => {
                                     if (!day) return <div key={idx} className="aspect-square"></div>;
-                                    const dayBookings = getDayBookings(day);
-                                    const hasAvailable = dayBookings.length > 0;
+                                    const daySlots = getDaySlots(day);
+                                    const hasSlots = daySlots.length > 0;
                                     return (
                                         <button
                                             key={day}
-                                            onClick={() => { setSelectedDate(day); setSelectedTime(null); }}
+                                            onClick={() => { setSelectedDate(day); setSelectedSlots([]); }}
                                             className={`aspect-square rounded-lg text-sm flex flex-col items-center justify-center transition-all ${
-                                                selectedDate === day 
-                                                    ? 'bg-blue-500 text-white' 
-                                                    : hasAvailable 
-                                                        ? 'bg-green-500/20 text-green-400 border border-green-500/40' 
-                                                        : 'bg-white/5 text-white/40'
+                                                selectedDate === day ? 'bg-blue-500 text-white' : hasSlots ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-white/5 text-white/40'
                                             }`}
                                         >
                                             <span>{day}</span>
-                                            {hasAvailable && <span className="text-[8px]">可约</span>}
+                                            {hasSlots && <span className="text-[8px]">{daySlots.length}个时段</span>}
                                         </button>
                                     );
                                 })}
@@ -421,18 +376,24 @@
                         
                         {selectedDate && (
                             <div className="mb-4">
-                                <span className="text-white/60 text-sm block mb-2">选择时间 ({month + 1}月{selectedDate}日)</span>
-                                {availableTimes.length > 0 ? (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {availableTimes.map((time) => (
-                                            <button
-                                                key={time}
-                                                onClick={() => setSelectedTime(time)}
-                                                className={`time-slot-btn ${selectedTime === time ? 'selected' : 'available'}`}
-                                            >
-                                                {time}
-                                            </button>
-                                        ))}
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-white/60 text-sm">选择时间 ({month + 1}月{selectedDate}日)</span>
+                                    <span className="text-blue-400 text-xs">已选{selectedSlots.length}个时段</span>
+                                </div>
+                                {daySlots.length > 0 ? (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {daySlots.map((slot, idx) => {
+                                            const isSelected = selectedSlots.some(s => s.date === slot.date && s.time_slot === slot.time_slot);
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => toggleSlot(slot)}
+                                                    className={`time-slot-btn ${isSelected ? 'multi-selected' : 'available'}`}
+                                                >
+                                                    {slot.time_slot}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <p className="text-white/40 text-sm">该日期暂无可用时段</p>
@@ -442,14 +403,12 @@
                         
                         <button
                             onClick={handleConfirm}
-                            disabled={!selectedDate || !selectedTime}
+                            disabled={selectedSlots.length === 0}
                             className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${
-                                selectedDate && selectedTime 
-                                    ? 'btn-primary text-white' 
-                                    : 'bg-white/10 text-white/40 cursor-not-allowed'
+                                selectedSlots.length > 0 ? 'btn-primary text-white' : 'bg-white/10 text-white/40 cursor-not-allowed'
                             }`}
                         >
-                            确认预约
+                            确认预约 ({selectedSlots.length}个时段)
                         </button>
                         <button onClick={onClose} className="w-full py-3 mt-2 bg-white/5 text-white/60 rounded-xl hover:bg-white/10 transition-colors">取消</button>
                     </div>
@@ -457,42 +416,15 @@
             );
         }
         
-        function ContactModal({ isOpen, onClose }) {
-            const wechatId = "OW_Booking_2024";
-            const [copied, setCopied] = useState(false);
-            const copy = () => { navigator.clipboard.writeText(wechatId); setCopied(true); setTimeout(() => setCopied(false), 2000); };
-            if (!isOpen) return null;
-            return (
-                <div className={`modal-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}>
-                    <div className="glass-card rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-white text-xl font-bold mb-4 text-center">联系和定图</h3>
-                        <div className="bg-white p-4 rounded-xl mb-4">
-                            <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                                <div className="text-center text-gray-800"><div className="text-6xl mb-2">📱</div><p className="text-sm">微信二维码</p><p className="text-xs text-gray-500 mt-1">扫码添加</p></div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white/5 rounded-lg p-3 mb-4">
-                            <span className="text-white/60 text-sm">微信号:</span>
-                            <span className="text-white font-mono flex-1">{wechatId}</span>
-                            <button onClick={copy} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${copied ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>{copied ? '已复制 ✓' : '复制'}</button>
-                        </div>
-                        <button onClick={onClose} className="w-full py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">关闭</button>
-                    </div>
-                </div>
-            );
-        }
-        
         function App() {
-            const [isContactOpen, setIsContactOpen] = useState(false);
             const [isBookingOpen, setIsBookingOpen] = useState(false);
             const [selectedPrice, setSelectedPrice] = useState(null);
-            const [bookings, setBookings] = useState([]);
+            const [slots, setSlots] = useState([]);
             const [status, setStatus] = useState('online');
             const [mood, setMood] = useState(mockData.player.mood);
             const [isConnected, setIsConnected] = useState(false);
             const [isSyncing, setIsSyncing] = useState(false);
             
-            // 加载数据
             const loadData = () => {
                 try {
                     const saved = localStorage.getItem('ow_booking_status');
@@ -500,30 +432,15 @@
                         const data = JSON.parse(saved);
                         if (data.status) setStatus(data.status);
                         if (data.mood) setMood(data.mood);
-                        if (data.bookings) {
-                            const formatted = data.bookings.map(b => ({
-                                date: b.date,
-                                status: b.status,
-                                time_slot: b.time_slot || b.time
-                            }));
-                            setBookings(formatted);
-                        }
+                        if (data.slots) setSlots(data.slots);
                         return true;
                     }
-                } catch (e) { console.log('Load error:', e); }
+                } catch (e) {}
                 return false;
             };
             
             useEffect(() => {
-                const hasData = loadData();
-                if (!hasData) {
-                    const today = new Date();
-                    setBookings([
-                        { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-15`, status: 'available', time_slot: '14:00-16:00' },
-                        { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-15`, status: 'available', time_slot: '19:00-21:00' },
-                        { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-16`, status: 'busy', time_slot: '14:00-16:00' },
-                    ]);
-                }
+                loadData();
                 setIsConnected(true);
                 
                 const handleStorage = (e) => {
@@ -553,17 +470,14 @@
                     <Header mood={mood} />
                     <div className="px-4 -mt-2">
                         <StatusCard status={status} />
-                        <Calendar bookings={bookings} />
+                        <Calendar slots={slots} />
                         <PriceList onBook={handleBook} />
-                        <Portfolio />
-                        <Features />
                         <div className="fade-in-up delay-500">
-                            <button onClick={() => setIsContactOpen(true)} className="w-full btn-primary py-4 rounded-xl text-white font-bold text-lg">联系老板确认</button>
+                            <button onClick={() => setIsBookingOpen(true)} className="w-full btn-primary py-4 rounded-xl text-white font-bold text-lg">联系老板确认</button>
                         </div>
                         <div className="text-center py-6"><p className="text-white/30 text-xs">本系统仅限核心老板查看</p></div>
                     </div>
-                    <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} bookings={bookings} />
-                    <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+                    <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} slots={slots} />
                 </div>
             );
         }
