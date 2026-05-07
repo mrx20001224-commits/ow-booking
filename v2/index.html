@@ -56,7 +56,7 @@
             ],
             portfolio: [
                 { id: 1, title: "艾什 - 好莱坞五杀", thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop", videoUrl: "https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/videos/ashe-hollywood-5k.mp4" },
-                { id: 2, title: "艾什 - 城市夜图团灭", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop", videoUrl: "https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/videos/ashe-teamwipe-5k.mp4" },
+                { id: 2, title: "艾什 - 中城五杀", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop", videoUrl: "https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/videos/ashe-teamwipe-5k.mp4" },
             ],
         };
         
@@ -139,6 +139,15 @@
                 
                 {/* 选择时间段 */}
                 <div className="mb-4"><p className="text-white/60 text-sm mb-2">选择时间（已选{selectedSlots.length}个时段）</p>{Object.entries(slotsByDate).map(([date, daySlots]) => <div key={date} className="mb-3"><p className="text-white text-xs mb-1">{date}</p><div className="grid grid-cols-3 gap-2">{daySlots.map((slot) => <button key={slot.id} onClick={() => toggleSlot(slot)} className={`time-slot-btn ${selectedSlots.find(s => s.id === slot.id) ? 'selected' : 'available'}`}>{slot.time_slot}</button>)}</div></div>)}</div>
+                
+                {/* 收款码 */}
+                {selectedSlots.length > 0 && (
+                    <div className="mb-4 p-3 bg-white/5 rounded-xl">
+                        <p className="text-white/60 text-sm mb-2">扫码支付定金</p>
+                        <img src="https://raw.githubusercontent.com/mrx20001224-commits/ow-booking/main/images/wechat-pay.jpg" alt="微信支付" className="w-32 h-32 mx-auto rounded-lg" />
+                        <p className="text-white/40 text-xs text-center mt-1">预约后请支付定金</p>
+                    </div>
+                )}
                 
                 <button onClick={handleConfirm} disabled={selectedSlots.length === 0 || !customerName || !customerContact} className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${selectedSlots.length > 0 && customerName && customerContact ? 'btn-primary text-white' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}>确认预约</button><button onClick={onClose} className="w-full py-3 mt-2 bg-white/5 text-white/60 rounded-xl hover:bg-white/10 transition-colors">取消</button></div></div>;
         }
