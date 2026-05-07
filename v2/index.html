@@ -42,7 +42,7 @@
             player: { name: "微信课索", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop", title: "国服挑战者 / 16年入坑老登 / 5千小时+" },
             prices: [
                 { id: 1, rank: "快速比赛", price: 25, icon: "⚡" },
-                { id: 2, rank: "青铜白银黄金", price: 35, icon: "🥉", note: "(根据分数)" },
+                { id: 2, rank: "青铜白银黄金", price: 35, icon: "🥉" },
                 { id: 3, rank: "角斗领域下三段", price: 45, icon: "⚔️" },
                 { id: 4, rank: "白金段位", price: 55, icon: "💎" },
                 { id: 5, rank: "钻石段位", price: 70, icon: "💎" },
@@ -73,7 +73,7 @@
         }
         
         function PriceList({ onBook }) {
-            return <div className="mb-4 fade-in-up delay-300"><h3 className="text-white font-semibold mb-3 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>预约价格表单</h3><div className="space-y-2">{mockData.prices.map((item) => <div key={item.id} className="price-tag rounded-xl p-3 flex items-center justify-between"><div className="flex items-center gap-2"><span className="text-lg">{item.icon}</span><div><span className="text-white font-medium">{item.rank}</span>{item.note && <span className="text-white/40 text-xs ml-1">{item.note}</span>}</div></div><div className="flex items-center gap-3"><span className="text-white font-bold">{item.price}r/h</span><button onClick={() => onBook(item)} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-500/80 text-white hover:bg-blue-500 transition-all">点此预约</button></div></div>)}</div></div>;
+            return <div className="mb-4 fade-in-up delay-300"><h3 className="text-white font-semibold mb-3 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>预约价格表单</h3><div className="space-y-2">{mockData.prices.map((item) => <div key={item.id} className="price-tag rounded-xl p-3 flex items-center justify-between"><div className="flex items-center gap-2"><span className="text-lg">{item.icon}</span><div><span className="text-white font-medium">{item.rank}</span></div></div><div className="flex items-center gap-3"><span className="text-white font-bold">{item.price}r/h</span><button onClick={() => onBook(item)} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-500/80 text-white hover:bg-blue-500 transition-all">点此预约</button></div></div>)}</div></div>;
         }
         
         function BookingModal({ isOpen, onClose, selectedPrice, slots }) {
@@ -138,7 +138,7 @@
             
             if (isLoading) return <div className="min-h-screen flex items-center justify-center text-white">加载中...</div>;
             
-            return <div className="min-h-screen pb-6"><Header mood={data.mood} /><div className="px-4 -mt-2"><StatusCard status={data.status} /><Portfolio onPlay={setPlayingVideo} /><PriceList onBook={handleBook} /><div className="fade-in-up delay-400"><button onClick={() => setIsBookingOpen(true)} className="w-full btn-primary py-4 rounded-xl text-white font-bold text-lg">联系老板确认</button></div><div className="text-center py-6"><p className="text-white/30 text-xs">本系统仅限核心老板查看</p></div></div><BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} slots={data.slots} /><VideoModal isOpen={!!playingVideo} onClose={() => setPlayingVideo(null)} video={playingVideo} /></div>;
+            return <div className="min-h-screen pb-6"><Header mood={data.mood} /><div className="px-4 -mt-2"><StatusCard status={data.status} /><Portfolio onPlay={setPlayingVideo} /><PriceList onBook={handleBook} /><div className="text-center py-6"><p className="text-white/30 text-xs">本系统仅限核心老板查看</p></div></div><BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} selectedPrice={selectedPrice} slots={data.slots} /><VideoModal isOpen={!!playingVideo} onClose={() => setPlayingVideo(null)} video={playingVideo} /></div>;
         }
         
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
