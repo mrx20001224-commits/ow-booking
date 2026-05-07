@@ -144,18 +144,29 @@
             const handleSave = async () => {
                 setIsSyncing(true);
                 
-                // 保存状态
-                await supabase.from('player_status').update({ status, mood, updated_at: new Date() }).eq('id', 1);
-                
-                // 保存时间段（先删除旧的，再插入新的）
-                await supabase.from('available_slots').delete().neq('id', 0);
-                if (slots.length > 0) {
-                    await supabase.from('available_slots').insert(slots);
+                try {
+                    // 保存状态
+                    const { error: statusError } = await supabase.from('player_status').update({ status, mood, updated_at: new Date().toISOString() }).eq('id', 1);
+                    if (statusError) console.log('Status update error:', statusError);
+                    
+                    // 保存时间段 - 使用 upsert 而不是 delete + insert
+                    for (const slot of slots) {
+                        const { error: slotError } = await supabase.from('available_slots').upsert({
+                            date: slot.date,
+                            time_slot: slot.time_slot,
+                            is_available: true
+                        }, { onConflict: 'date,time_slot' });
+                        if (slotError) console.log('Slot upsert error:', slotError);
+                    }
+                    
+                    setShowToast(true);
+                    setTimeout(() => setShowToast(false), 2000);
+                } catch (e) {
+                    console.error('Save error:', e);
+                    alert('保存失败: ' + e.message);
                 }
                 
                 setIsSyncing(false);
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 2000);
             };
             
             return <div className="min-h-screen px-4 py-6 max-w-md mx-auto"><SyncIndicator isConnected={isConnected} isSyncing={isSyncing} /><div className="flex items-center justify-between mb-6"><div><h1 className="text-2xl font-bold text-white">后台控制台</h1><p className="text-white/40 text-sm mt-1">管理你的实时状态</p></div><a href="index.html" className="text-blue-400 text-sm hover:underline">查看前台 →</a></div><StatusControl status={status} onChange={setStatus} /><MoodControl mood={mood} onChange={setMood} /><CalendarControl slots={slots} onUpdateSlots={setSlots} /><BookingsList bookings={bookings} /><button onClick={handleSave} className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>保存并同步到所有用户</button><p className="text-center text-white/30 text-xs mt-4">所有更改将实时同步给查看链接的老板们</p><div className={`toast ${showToast ? 'show' : ''}`}>✓ 已同步到所有用户</div></div>;
