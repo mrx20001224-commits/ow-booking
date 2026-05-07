@@ -8,35 +8,27 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #0d1117 0%, #010409 100%); min-height: 100vh; color: #fff; }
         .glass-card { background: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.95) 100%); border: 1px solid rgba(48, 54, 61, 0.6); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
-        .status-btn { transition: all 0.3s ease; position: relative; overflow: hidden; }
-        .status-btn.active { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 0, 0, 0.3); }
+        .status-btn { transition: all 0.3s ease; }
+        .status-btn.active { transform: scale(1.02); }
         .status-online { background: linear-gradient(135deg, rgba(35, 197, 94, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%); border: 2px solid rgba(35, 197, 94, 0.6); }
-        .status-online.active { box-shadow: 0 0 40px rgba(35, 197, 94, 0.4); }
         .status-busy { background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%); border: 2px solid rgba(239, 68, 68, 0.6); }
-        .status-busy.active { box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
         .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.05); }
         .calendar-day:hover { background: rgba(255, 255, 255, 0.1); }
         .calendar-day.selected { background: rgba(59, 130, 246, 0.3); border: 2px solid rgba(59, 130, 246, 0.6); }
         .calendar-day.has-slots { background: rgba(35, 197, 94, 0.15); border: 1px solid rgba(35, 197, 94, 0.4); }
-        .time-input { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; width: 80px; text-align: center; outline: none; }
-        .time-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .time-input { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; width: 80px; text-align: center; }
         .slot-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); border-radius: 20px; font-size: 13px; color: #4ade80; margin: 4px; }
-        .slot-tag button { background: none; border: none; color: #f87171; cursor: pointer; font-size: 16px; line-height: 1; }
         .save-btn { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; }
         .save-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); }
-        .sync-indicator { position: fixed; top: 10px; right: 10px; padding: 6px 12px; background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); border-radius: 20px; font-size: 11px; color: #4ade80; display: flex; align-items: center; gap: 6px; z-index: 50; }
-        .sync-indicator.syncing { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(35, 197, 94, 0.95); color: black; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 100; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        input, textarea { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 10px 12px; color: white; font-size: 14px; width: 100%; outline: none; transition: all 0.3s; }
-        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        input { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 10px 12px; color: white; font-size: 14px; width: 100%; }
         .booking-item { background: rgba(35, 197, 94, 0.1); border: 1px solid rgba(35, 197, 94, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
     </style>
 </head>
@@ -45,51 +37,40 @@
     
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const { createClient } = supabase;
         
-        const SUPABASE_URL = 'https://dlvuucolnpgkxfwdwxfc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_76KuJRcR_mKGZtpG_mEdhg_pYIGTo7V';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // GitHub API 配置 - 请在此处填入你的 GitHub Token
+        // 获取方式：GitHub Settings -> Developer settings -> Personal access tokens
+        const GITHUB_TOKEN = prompt('请输入 GitHub Token 以保存数据：\n（Token 仅用于保存，不会上传）');
+        if (!GITHUB_TOKEN) { alert('需要 GitHub Token 才能保存数据'); }
+        const REPO = 'mrx20001224-commits/ow-booking';
+        const FILE_PATH = 'v2/data.json';
         
-        function SyncIndicator({ isConnected, isSyncing }) {
-            return <div className={`sync-indicator ${isSyncing ? 'syncing' : ''}`}><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>{isSyncing ? '同步中...' : isConnected ? '已连接' : '离线'}</div>;
-        }
-        
-        function StatusControl({ status, onChange }) {
-            return <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>当前状态</h2><div className="space-y-3"><button onClick={() => onChange('online')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'online' ? 'active status-online' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={`font-semibold ${status === 'online' ? 'text-green-400' : 'text-white'}`}>Online</div><div className="text-sm text-white/50">空闲，可接单</div></div>{status === 'online' && <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>}</button><button onClick={() => onChange('busy')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'busy' ? 'active status-busy' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'busy' ? 'bg-red-400 animate-pulse' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={`font-semibold ${status === 'busy' ? 'text-red-400' : 'text-white'}`}>Busy</div><div className="text-sm text-white/50">忙碌，暂停接单</div></div>{status === 'busy' && <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>}</button></div></div>;
-        }
-        
-        function MoodControl({ mood, onChange }) {
-            return <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>实时心情</h2><input type="text" value={mood} onChange={(e) => onChange(e.target.value)} placeholder="例如：手感爆热，带飞！" maxLength={30} /></div>;
-        }
-        
-        function TimeSlotManager({ selectedDate, slots, onUpdateSlots }) {
-            const [startTime, setStartTime] = useState('14');
-            const [endTime, setEndTime] = useState('16');
-            if (!selectedDate) return null;
-            const dateSlots = slots.filter(s => s.date === selectedDate);
-            
-            const addSlot = () => {
-                const start = parseInt(startTime), end = parseInt(endTime);
-                if (start >= end) { alert('结束时间必须大于开始时间'); return; }
-                const newSlots = [];
-                for (let i = start; i < end; i++) {
-                    const timeStr = `${String(i).padStart(2, '0')}:00-${String(i + 1).padStart(2, '0')}:00`;
-                    if (!dateSlots.some(s => s.time_slot === timeStr)) {
-                        newSlots.push({ date: selectedDate, time_slot: timeStr, is_available: true });
-                    }
-                }
-                onUpdateSlots([...slots, ...newSlots]);
-            };
-            
-            const removeSlot = (slot) => { onUpdateSlots(slots.filter(s => !(s.date === selectedDate && s.time_slot === slot.time_slot))); };
-            
-            return <div className="border-t border-white/10 pt-4 mt-4"><p className="text-white font-medium mb-3">{selectedDate} 时间段设置</p><div className="flex items-center gap-3 mb-4"><div className="flex items-center gap-2"><input type="number" min="0" max="23" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><span className="text-white/40">至</span><div className="flex items-center gap-2"><input type="number" min="1" max="24" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><button onClick={addSlot} className="px-4 py-2 bg-green-500/80 text-white rounded-lg text-sm font-medium hover:bg-green-500 transition-colors">添加</button></div><div className="flex flex-wrap">{dateSlots.length === 0 ? <p className="text-white/40 text-sm">该日期暂无可用时段</p> : dateSlots.map((slot, idx) => <span key={idx} className="slot-tag">{slot.time_slot}<button onClick={() => removeSlot(slot)}>×</button></span>)}</div></div>;
-        }
-        
-        function CalendarControl({ slots, onUpdateSlots }) {
+        function AdminApp() {
+            const [status, setStatus] = useState('online');
+            const [mood, setMood] = useState('手感爆热，带飞！');
+            const [slots, setSlots] = useState([]);
+            const [bookings, setBookings] = useState([]);
             const [viewDate, setViewDate] = useState(new Date());
             const [selectedDay, setSelectedDay] = useState(null);
+            const [startTime, setStartTime] = useState('14');
+            const [endTime, setEndTime] = useState('18');
+            const [isLoading, setIsLoading] = useState(true);
+            const [showToast, setShowToast] = useState(false);
+            
+            // 加载数据
+            useEffect(() => {
+                fetch(`https://raw.githubusercontent.com/${REPO}/main/${FILE_PATH}?t=${Date.now()}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        setStatus(data.status || 'online');
+                        setMood(data.mood || '手感爆热，带飞！');
+                        setSlots(data.slots || []);
+                        setBookings(data.bookings || []);
+                        setIsLoading(false);
+                    })
+                    .catch(() => setIsLoading(false));
+            }, []);
+            
             const year = viewDate.getFullYear(), month = viewDate.getMonth();
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -99,77 +80,71 @@
             
             const getDaySlots = (day) => day ? slots.filter(s => s.date === `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`) : [];
             
-            return <div className="glass-card rounded-2xl p-5 mb-4"><div className="flex items-center justify-between mb-4"><h2 className="text-white font-semibold flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>可预约时间管理</h2><div className="flex gap-2"><button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&lt;</button><span className="text-white/80">{year}年{month + 1}月</span><button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&gt;</button></div></div><div className="grid grid-cols-7 gap-1 mb-2">{['日','一','二','三','四','五','六'].map(d => <div key={d} className="text-center text-white/40 text-xs py-2">{d}</div>)}</div><div className="grid grid-cols-7 gap-1 mb-4">{days.map((day, idx) => { if (!day) return <div key={idx} className="calendar-day" style={{background:'transparent'}}></div>; const daySlots = getDaySlots(day); return <div key={day} className={`calendar-day ${selectedDay === day ? 'selected' : ''} ${daySlots.length > 0 ? 'has-slots' : ''}`} onClick={() => setSelectedDay(selectedDay === day ? null : day)}><span>{day}</span>{daySlots.length > 0 && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-green-400"></div>}</div>; })}</div>{selectedDay && <TimeSlotManager selectedDate={`${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`} slots={slots} onUpdateSlots={onUpdateSlots} />}</div>;
-        }
-        
-        function BookingsList({ bookings }) {
-            return <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-blue-500 rounded-full"></span>预约记录 ({bookings.length})</h2>{bookings.length === 0 ? <p className="text-white/40 text-sm">暂无预约</p> : <div className="space-y-2 max-h-60 overflow-y-auto">{bookings.map((booking) => <div key={booking.id} className="booking-item"><div className="flex justify-between items-start"><div><p className="text-white font-medium">{booking.customer_name}</p><p className="text-white/60 text-sm">{booking.customer_contact}</p><p className="text-blue-400 text-sm">{booking.price_rank} · {booking.price_amount}r/h</p><p className="text-white/40 text-xs mt-1">{booking.notes || '无备注'}</p></div><span className={`px-2 py-0.5 rounded text-xs ${booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>{booking.status === 'pending' ? '待确认' : booking.status === 'confirmed' ? '已确认' : booking.status}</span></div></div>)}</div>}</div>;
-        }
-        
-        function AdminApp() {
-            const [status, setStatus] = useState('online');
-            const [mood, setMood] = useState('手感爆热，带飞！');
-            const [slots, setSlots] = useState([]);
-            const [bookings, setBookings] = useState([]);
-            const [isConnected, setIsConnected] = useState(true);
-            const [isSyncing, setIsSyncing] = useState(false);
-            const [showToast, setShowToast] = useState(false);
-            
-            // 加载数据
-            useEffect(() => {
-                const loadData = async () => {
-                    // 加载状态
-                    const { data: statusData } = await supabase.from('player_status').select('*').single();
-                    if (statusData) { setStatus(statusData.status); setMood(statusData.mood); }
-                    
-                    // 加载时间段
-                    const { data: slotsData } = await supabase.from('available_slots').select('*');
-                    if (slotsData) setSlots(slotsData);
-                    
-                    // 加载预约记录
-                    const { data: bookingsData } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
-                    if (bookingsData) setBookings(bookingsData);
-                };
-                
-                loadData();
-                
-                // 订阅实时更新
-                supabase.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public' }, () => {
-                    setIsSyncing(true);
-                    loadData();
-                    setTimeout(() => setIsSyncing(false), 500);
-                }).subscribe();
-            }, []);
-            
-            const handleSave = async () => {
-                setIsSyncing(true);
-                
-                try {
-                    // 保存状态
-                    const { error: statusError } = await supabase.from('player_status').update({ status, mood, updated_at: new Date().toISOString() }).eq('id', 1);
-                    if (statusError) console.log('Status update error:', statusError);
-                    
-                    // 保存时间段 - 使用 upsert 而不是 delete + insert
-                    for (const slot of slots) {
-                        const { error: slotError } = await supabase.from('available_slots').upsert({
-                            date: slot.date,
-                            time_slot: slot.time_slot,
-                            is_available: true
-                        }, { onConflict: 'date,time_slot' });
-                        if (slotError) console.log('Slot upsert error:', slotError);
+            const addSlot = () => {
+                const start = parseInt(startTime), end = parseInt(endTime);
+                if (start >= end) { alert('结束时间必须大于开始时间'); return; }
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+                const newSlots = [];
+                for (let i = start; i < end; i++) {
+                    const timeStr = `${String(i).padStart(2, '0')}:00-${String(i + 1).padStart(2, '0')}:00`;
+                    if (!slots.some(s => s.date === dateStr && s.time_slot === timeStr)) {
+                        newSlots.push({ date: dateStr, time_slot: timeStr, is_available: true });
                     }
-                    
-                    setShowToast(true);
-                    setTimeout(() => setShowToast(false), 2000);
-                } catch (e) {
-                    console.error('Save error:', e);
-                    alert('保存失败: ' + e.message);
                 }
-                
-                setIsSyncing(false);
+                setSlots([...slots, ...newSlots]);
             };
             
-            return <div className="min-h-screen px-4 py-6 max-w-md mx-auto"><SyncIndicator isConnected={isConnected} isSyncing={isSyncing} /><div className="flex items-center justify-between mb-6"><div><h1 className="text-2xl font-bold text-white">后台控制台</h1><p className="text-white/40 text-sm mt-1">管理你的实时状态</p></div><a href="index.html" className="text-blue-400 text-sm hover:underline">查看前台 →</a></div><StatusControl status={status} onChange={setStatus} /><MoodControl mood={mood} onChange={setMood} /><CalendarControl slots={slots} onUpdateSlots={setSlots} /><BookingsList bookings={bookings} /><button onClick={handleSave} className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>保存并同步到所有用户</button><p className="text-center text-white/30 text-xs mt-4">所有更改将实时同步给查看链接的老板们</p><div className={`toast ${showToast ? 'show' : ''}`}>✓ 已同步到所有用户</div></div>;
+            const removeSlot = (slot) => { setSlots(slots.filter(s => !(s.date === slot.date && s.time_slot === slot.time_slot))); };
+            
+            const handleSave = async () => {
+                if (!GITHUB_TOKEN) { alert('请先输入 GitHub Token'); return; }
+                
+                const data = { status, mood, slots, bookings, updated_at: new Date().toISOString() };
+                
+                try {
+                    // 获取当前文件的 SHA
+                    const metaRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, { headers: { Authorization: `token ${GITHUB_TOKEN}` }});
+                    const meta = await metaRes.json();
+                    
+                    // 更新文件
+                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+                        method: 'PUT',
+                        headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: 'Update data', content, sha: meta.sha })
+                    });
+                    
+                    if (res.ok) {
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
+                    } else {
+                        alert('保存失败，请检查 Token 是否正确');
+                    }
+                } catch (e) {
+                    alert('保存失败：' + e.message);
+                }
+            };
+            
+            if (isLoading) return <div className="min-h-screen flex items-center justify-center text-white">加载中...</div>;
+            
+            return <div className="min-h-screen px-4 py-6 max-w-md mx-auto">
+                <div className="flex items-center justify-between mb-6"><div><h1 className="text-2xl font-bold text-white">后台控制台</h1><p className="text-white/40 text-sm mt-1">管理你的实时状态</p></div><a href="index.html" className="text-blue-400 text-sm hover:underline">查看前台 →</a></div>
+                
+                {/* 状态切换 */}
+                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">当前状态</h2><div className="space-y-3"><button onClick={() => setStatus('online')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'online' ? 'active status-online' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'online' ? 'bg-green-400' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={status === 'online' ? 'text-green-400 font-semibold' : 'text-white font-semibold'}>Online</div><div className="text-sm text-white/50">空闲，可接单</div></div>{status === 'online' && '✓'}</button><button onClick={() => setStatus('busy')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'busy' ? 'active status-busy' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'busy' ? 'bg-red-400' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={status === 'busy' ? 'text-red-400 font-semibold' : 'text-white font-semibold'}>Busy</div><div className="text-sm text-white/50">忙碌，暂停接单</div></div>{status === 'busy' && '✓'}</button></div></div>
+                
+                {/* 心情 */}
+                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">实时心情</h2><input type="text" value={mood} onChange={(e) => setMood(e.target.value)} placeholder="例如：手感爆热，带飞！" maxLength={30} /></div>
+                
+                {/* 日历 */}
+                <div className="glass-card rounded-2xl p-5 mb-4"><div className="flex items-center justify-between mb-4"><h2 className="text-white font-semibold">可预约时间管理</h2><div className="flex gap-2"><button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60">&lt;</button><span className="text-white/80">{year}年{month + 1}月</span><button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60">&gt;</button></div></div><div className="grid grid-cols-7 gap-1 mb-2">{['日','一','二','三','四','五','六'].map(d => <div key={d} className="text-center text-white/40 text-xs py-2">{d}</div>)}</div><div className="grid grid-cols-7 gap-1 mb-4">{days.map((day, idx) => { if (!day) return <div key={idx} className="calendar-day" style={{background:'transparent'}}></div>; const daySlots = getDaySlots(day); return <div key={day} className={`calendar-day ${selectedDay === day ? 'selected' : ''} ${daySlots.length > 0 ? 'has-slots' : ''}`} onClick={() => setSelectedDay(selectedDay === day ? null : day)}><span>{day}</span>{daySlots.length > 0 && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-green-400"></div>}</div>; })}</div>{selectedDay && <div className="border-t border-white/10 pt-4"><p className="text-white font-medium mb-3">{year}-{String(month + 1).padStart(2, '0')}-{String(selectedDay).padStart(2, '0')} 时间段设置</p><div className="flex items-center gap-3 mb-4"><div className="flex items-center gap-2"><input type="number" min="0" max="23" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><span className="text-white/40">至</span><div className="flex items-center gap-2"><input type="number" min="1" max="24" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><button onClick={addSlot} className="px-4 py-2 bg-green-500/80 text-white rounded-lg text-sm">添加</button></div><div className="flex flex-wrap">{getDaySlots(selectedDay).length === 0 ? <p className="text-white/40 text-sm">该日期暂无可用时段</p> : getDaySlots(selectedDay).map((slot, idx) => <span key={idx} className="slot-tag">{slot.time_slot}<button onClick={() => removeSlot(slot)}>×</button></span>)}</div></div>}</div>
+                
+                {/* 预约记录 */}
+                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">预约记录 ({bookings.length})</h2>{bookings.length === 0 ? <p className="text-white/40 text-sm">暂无预约</p> : <div className="space-y-2 max-h-60 overflow-y-auto">{bookings.map((b, i) => <div key={i} className="booking-item"><p className="text-white font-medium">{b.customer_name}</p><p className="text-white/60 text-sm">{b.customer_contact}</p><p className="text-blue-400 text-sm">{b.price_rank} · {b.price_amount}r/h</p><p className="text-white/40 text-xs">{b.slots?.map(s => `${s.date} ${s.time_slot}`).join(', ')}</p></div>)}</div>}</div>
+                
+                <button onClick={handleSave} className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg">保存并同步到所有用户</button>
+                <div className={`toast ${showToast ? 'show' : ''}`}>✓ 已同步</div>
+            </div>;
         }
         
         ReactDOM.createRoot(document.getElementById('root')).render(<AdminApp />);
