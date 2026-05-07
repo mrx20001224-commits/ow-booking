@@ -8,8 +8,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.2.0/lunar.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -28,31 +26,20 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
         
-        .status-btn {
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .status-btn.active {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-        }
+        .status-btn { transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .status-btn.active { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 0, 0, 0.3); }
         
         .status-online {
             background: linear-gradient(135deg, rgba(35, 197, 94, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%);
             border: 2px solid rgba(35, 197, 94, 0.6);
         }
-        .status-online.active {
-            box-shadow: 0 0 40px rgba(35, 197, 94, 0.4);
-        }
+        .status-online.active { box-shadow: 0 0 40px rgba(35, 197, 94, 0.4); }
         
         .status-busy {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%);
             border: 2px solid rgba(239, 68, 68, 0.6);
         }
-        .status-busy.active {
-            box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
-        }
+        .status-busy.active { box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
         
         .calendar-day {
             aspect-ratio: 1;
@@ -65,37 +52,51 @@
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
+            background: rgba(255, 255, 255, 0.05);
         }
         .calendar-day:hover { background: rgba(255, 255, 255, 0.1); }
         .calendar-day.selected {
             background: rgba(59, 130, 246, 0.3);
             border: 2px solid rgba(59, 130, 246, 0.6);
         }
-        .calendar-day .lunar {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 1px;
+        .calendar-day.has-slots {
+            background: rgba(35, 197, 94, 0.15);
+            border: 1px solid rgba(35, 197, 94, 0.4);
         }
+        .calendar-day .lunar { font-size: 9px; color: rgba(255, 255, 255, 0.4); margin-top: 1px; }
         
-        .time-slot {
-            padding: 8px 12px;
-            border-radius: 8px;
+        .time-input {
+            background: rgba(22, 27, 34, 0.8);
             border: 1px solid rgba(48, 54, 61, 0.6);
-            background: rgba(22, 27, 34, 0.6);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 13px;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            width: 80px;
+            text-align: center;
+            outline: none;
         }
-        .time-slot:hover { background: rgba(255, 255, 255, 0.05); }
-        .time-slot.available {
+        .time-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        
+        .slot-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
             background: rgba(35, 197, 94, 0.2);
-            border-color: rgba(35, 197, 94, 0.5);
+            border: 1px solid rgba(35, 197, 94, 0.4);
+            border-radius: 20px;
+            font-size: 13px;
             color: #4ade80;
+            margin: 4px;
         }
-        .time-slot.busy {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
+        .slot-tag button {
+            background: none;
+            border: none;
             color: #f87171;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
         }
         
         .save-btn {
@@ -134,10 +135,7 @@
             background: currentColor;
             animation: pulse 1.5s ease-in-out infinite;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         .toast {
             position: fixed;
@@ -153,10 +151,7 @@
             transition: all 0.3s ease;
             z-index: 100;
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
         input, textarea {
             background: rgba(22, 27, 34, 0.8);
@@ -169,10 +164,7 @@
             outline: none;
             transition: all 0.3s;
         }
-        input:focus, textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
+        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body>
@@ -181,7 +173,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // 农历工具
         const getLunarDate = (year, month, day) => {
             try {
                 if (typeof Lunar !== 'undefined') {
@@ -194,7 +185,6 @@
             return '';
         };
         
-        // 同步指示器
         function SyncIndicator({ isConnected, isSyncing }) {
             return (
                 <div className={`sync-indicator ${isSyncing ? 'syncing' : ''}`}>
@@ -204,7 +194,6 @@
             );
         }
         
-        // 状态切换
         function StatusControl({ status, onChange }) {
             return (
                 <div className="glass-card rounded-2xl p-5 mb-4">
@@ -250,7 +239,6 @@
             );
         }
         
-        // 心情编辑
         function MoodControl({ mood, onChange }) {
             return (
                 <div className="glass-card rounded-2xl p-5 mb-4">
@@ -258,66 +246,115 @@
                         <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
                         实时心情
                     </h2>
-                    <input
-                        type="text"
-                        value={mood}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder="例如：手感爆热，带飞！"
-                        maxLength={30}
-                    />
+                    <input type="text" value={mood} onChange={(e) => onChange(e.target.value)} placeholder="例如：手感爆热，带飞！" maxLength={30} />
                 </div>
             );
         }
         
-        // 日历管理
-        function CalendarControl({ bookings, onUpdateBooking }) {
+        // 24小时时间段管理
+        function TimeSlotManager({ selectedDate, slots, onUpdateSlots }) {
+            const [startTime, setStartTime] = useState('14');
+            const [endTime, setEndTime] = useState('16');
+            
+            if (!selectedDate) return null;
+            
+            const dateSlots = slots.filter(s => s.date === selectedDate);
+            
+            const addSlot = () => {
+                const start = parseInt(startTime);
+                const end = parseInt(endTime);
+                
+                if (start >= end) {
+                    alert('结束时间必须大于开始时间');
+                    return;
+                }
+                
+                const newSlots = [];
+                for (let i = start; i < end; i++) {
+                    const timeStr = `${String(i).padStart(2, '0')}:00-${String(i + 1).padStart(2, '0')}:00`;
+                    // 检查是否已存在
+                    const exists = dateSlots.some(s => s.time_slot === timeStr);
+                    if (!exists) {
+                        newSlots.push({ date: selectedDate, time_slot: timeStr, status: 'available' });
+                    }
+                }
+                
+                onUpdateSlots([...slots, ...newSlots]);
+            };
+            
+            const removeSlot = (slotToRemove) => {
+                onUpdateSlots(slots.filter(s => !(s.date === selectedDate && s.time_slot === slotToRemove.time_slot)));
+            };
+            
+            return (
+                <div className="border-t border-white/10 pt-4 mt-4">
+                    <p className="text-white font-medium mb-3">{selectedDate} 时间段设置</p>
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="number" 
+                                min="0" max="23" 
+                                value={startTime} 
+                                onChange={(e) => setStartTime(e.target.value)}
+                                className="time-input"
+                            />
+                            <span className="text-white/60">:00</span>
+                        </div>
+                        <span className="text-white/40">至</span>
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="number" 
+                                min="1" max="24" 
+                                value={endTime} 
+                                onChange={(e) => setEndTime(e.target.value)}
+                                className="time-input"
+                            />
+                            <span className="text-white/60">:00</span>
+                        </div>
+                        <button 
+                            onClick={addSlot}
+                            className="px-4 py-2 bg-green-500/80 text-white rounded-lg text-sm font-medium hover:bg-green-500 transition-colors"
+                        >
+                            添加
+                        </button>
+                    </div>
+                    
+                    <div className="flex flex-wrap">
+                        {dateSlots.length === 0 ? (
+                            <p className="text-white/40 text-sm">该日期暂无可用时段</p>
+                        ) : (
+                            dateSlots.map((slot, idx) => (
+                                <span key={idx} className="slot-tag">
+                                    {slot.time_slot}
+                                    <button onClick={() => removeSlot(slot)}>×</button>
+                                </span>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        
+        function CalendarControl({ slots, onUpdateSlots }) {
             const [viewDate, setViewDate] = useState(new Date());
             const [selectedDay, setSelectedDay] = useState(null);
             
-            const year = viewDate.getFullYear();
-            const month = viewDate.getMonth();
+            const year = viewDate.getFullYear(), month = viewDate.getMonth();
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
             const days = [];
             for (let i = 0; i < firstDay; i++) days.push(null);
             for (let i = 1; i <= daysInMonth; i++) days.push(i);
             
-            const timeSlots = [
-                '10:00-12:00', '12:00-14:00', '14:00-16:00', 
-                '16:00-18:00', '18:00-20:00', '20:00-22:00'
-            ];
-            
-            const getDayBookings = (day) => {
+            const getDaySlots = (day) => {
                 if (!day) return [];
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                return bookings.filter(b => b.date === dateStr);
+                return slots.filter(s => s.date === dateStr);
             };
             
-            const toggleTimeSlot = (day, time) => {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const existing = bookings.find(b => b.date === dateStr && b.time_slot === time);
-                
-                if (existing) {
-                    onUpdateBooking(bookings.filter(b => !(b.date === dateStr && b.time_slot === time)));
-                } else {
-                    onUpdateBooking([...bookings, { date: dateStr, time_slot: time, status: 'available' }]);
-                }
-            };
-            
-            const markAsBusy = (day, time) => {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const existing = bookings.find(b => b.date === dateStr && b.time_slot === time);
-                
-                if (existing) {
-                    onUpdateBooking(bookings.map(b => 
-                        b.date === dateStr && b.time_slot === time 
-                            ? { ...b, status: b.status === 'busy' ? 'available' : 'busy' }
-                            : b
-                    ));
-                } else {
-                    onUpdateBooking([...bookings, { date: dateStr, time_slot: time, status: 'busy' }]);
-                }
+            const formatSelectedDate = (day) => {
+                return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             };
             
             return (
@@ -325,119 +362,77 @@
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-white font-semibold flex items-center gap-2">
                             <span className="w-1 h-4 bg-blue-500 rounded-full"></span>
-                            预约管理
+                            可预约时间管理
                         </h2>
                         <div className="flex gap-2">
-                            <button 
-                                onClick={() => setViewDate(new Date(year, month - 1, 1))}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white"
-                            >&lt;</button>
+                            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&lt;</button>
                             <span className="text-white/80">{year}年{month + 1}月</span>
-                            <button 
-                                onClick={() => setViewDate(new Date(year, month + 1, 1))}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white"
-                            >&gt;</button>
+                            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">&gt;</button>
                         </div>
                     </div>
                     
                     <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['日','一','二','三','四','五','六'].map(d => (
-                            <div key={d} className="text-center text-white/40 text-xs py-2">{d}</div>
-                        ))}
+                        {['日','一','二','三','四','五','六'].map(d => <div key={d} className="text-center text-white/40 text-xs py-2">{d}</div>)}
                     </div>
                     
                     <div className="grid grid-cols-7 gap-1 mb-4">
                         {days.map((day, idx) => {
-                            if (!day) return <div key={idx} className="calendar-day"></div>;
-                            const dayBookings = getDayBookings(day);
-                            const hasAvailable = dayBookings.some(b => b.status === 'available');
-                            const hasBusy = dayBookings.some(b => b.status === 'busy');
-                            
+                            if (!day) return <div key={idx} className="calendar-day" style={{background:'transparent'}}></div>;
+                            const daySlots = getDaySlots(day);
+                            const hasSlots = daySlots.length > 0;
                             return (
                                 <div 
                                     key={day}
-                                    className={`calendar-day ${selectedDay === day ? 'selected' : ''} ${hasAvailable ? 'text-green-400' : ''} ${hasBusy ? 'text-red-400' : ''}`}
+                                    className={`calendar-day ${selectedDay === day ? 'selected' : ''} ${hasSlots ? 'has-slots' : ''}`}
                                     onClick={() => setSelectedDay(selectedDay === day ? null : day)}
                                 >
                                     <span>{day}</span>
                                     <span className="lunar">{getLunarDate(year, month + 1, day)}</span>
-                                    {dayBookings.length > 0 && (
-                                        <div className="absolute bottom-1 flex gap-0.5">
-                                            {hasAvailable && <div className="w-1 h-1 rounded-full bg-green-400"></div>}
-                                            {hasBusy && <div className="w-1 h-1 rounded-full bg-red-400"></div>}
-                                        </div>
-                                    )}
+                                    {hasSlots && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-green-400"></div>}
                                 </div>
                             );
                         })}
                     </div>
                     
                     {selectedDay && (
-                        <div className="border-t border-white/10 pt-4">
-                            <p className="text-white/60 text-sm mb-3">
-                                {month + 1}月{selectedDay}日 时段设置
-                                <span className="text-white/40 text-xs ml-2">点击切换状态</span>
-                            </p>
-                            <div className="grid grid-cols-2 gap-2">
-                                {timeSlots.map(time => {
-                                    const dayBookings = getDayBookings(selectedDay);
-                                    const booking = dayBookings.find(b => b.time_slot === time);
-                                    const status = booking?.status || null;
-                                    
-                                    return (
-                                        <button
-                                            key={time}
-                                            onClick={() => markAsBusy(selectedDay, time)}
-                                            onLongPress={() => toggleTimeSlot(selectedDay, time)}
-                                            className={`time-slot ${status === 'available' ? 'available' : ''} ${status === 'busy' ? 'busy' : ''}`}
-                                        >
-                                            {time}
-                                            {status === 'available' && ' ✓'}
-                                            {status === 'busy' && ' ✗'}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <p className="text-white/40 text-xs mt-2">绿色=可预约 | 红色=已约满 | 灰色=未设置</p>
-                        </div>
+                        <TimeSlotManager 
+                            selectedDate={formatSelectedDate(selectedDay)} 
+                            slots={slots} 
+                            onUpdateSlots={onUpdateSlots}
+                        />
                     )}
                 </div>
             );
         }
         
-        // 主应用
         function AdminApp() {
             const [status, setStatus] = useState('online');
             const [mood, setMood] = useState('手感爆热，带飞！');
-            const [bookings, setBookings] = useState([]);
+            const [slots, setSlots] = useState([]);
             const [isConnected, setIsConnected] = useState(true);
             const [isSyncing, setIsSyncing] = useState(false);
             const [showToast, setShowToast] = useState(false);
             
-            // 模拟从服务器加载数据
+            // 加载保存的数据
             useEffect(() => {
-                const today = new Date();
-                const mockBookings = [
-                    { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-15`, time_slot: '14:00-16:00', status: 'available' },
-                    { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-15`, time_slot: '19:00-21:00', status: 'available' },
-                    { date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-16`, time_slot: '14:00-16:00', status: 'busy' },
-                ];
-                setBookings(mockBookings);
+                const saved = localStorage.getItem('ow_booking_status');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.status) setStatus(data.status);
+                        if (data.mood) setMood(data.mood);
+                        if (data.slots) setSlots(data.slots);
+                    } catch (e) {}
+                }
             }, []);
             
             const handleSave = () => {
                 setIsSyncing(true);
                 
-                // 保存到 localStorage
-                const dataToSave = {
-                    status,
-                    mood,
-                    bookings: bookings,
-                    updatedAt: new Date().toISOString()
-                };
+                const dataToSave = { status, mood, slots, updatedAt: new Date().toISOString() };
                 localStorage.setItem('ow_booking_status', JSON.stringify(dataToSave));
                 
-                // 触发 storage 事件让其他标签页同步
+                // 触发 storage 事件
                 window.dispatchEvent(new StorageEvent('storage', {
                     key: 'ow_booking_status',
                     newValue: JSON.stringify(dataToSave)
@@ -464,25 +459,18 @@
                     
                     <StatusControl status={status} onChange={setStatus} />
                     <MoodControl mood={mood} onChange={setMood} />
-                    <CalendarControl bookings={bookings} onUpdateBooking={setBookings} />
+                    <CalendarControl slots={slots} onUpdateSlots={setSlots} />
                     
-                    <button
-                        onClick={handleSave}
-                        className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2"
-                    >
+                    <button onClick={handleSave} className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         保存并同步到所有用户
                     </button>
                     
-                    <p className="text-center text-white/30 text-xs mt-4">
-                        所有更改将实时同步给查看链接的老板们
-                    </p>
+                    <p className="text-center text-white/30 text-xs mt-4">所有更改将实时同步给查看链接的老板们</p>
                     
-                    <div className={`toast ${showToast ? 'show' : ''}`}>
-                        ✓ 已同步到所有用户
-                    </div>
+                    <div className={`toast ${showToast ? 'show' : ''}`}>✓ 已同步到所有用户</div>
                 </div>
             );
         }
