@@ -1,211 +1,1086 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OW陪玩 - 后台控制台</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #0d1117 0%, #010409 100%); min-height: 100vh; color: #fff; }
-        .glass-card { background: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.95) 100%); border: 1px solid rgba(48, 54, 61, 0.6); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
-        .status-btn { transition: all 0.3s ease; }
-        .status-btn.active { transform: scale(1.02); }
-        .status-online { background: linear-gradient(135deg, rgba(35, 197, 94, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%); border: 2px solid rgba(35, 197, 94, 0.6); }
-        .status-busy { background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(22, 27, 34, 0.9) 100%); border: 2px solid rgba(239, 68, 68, 0.6); }
-        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.05); position: relative; }
-        .calendar-day:hover { background: rgba(255, 255, 255, 0.1); }
-        .calendar-day.selected { background: rgba(59, 130, 246, 0.3); border: 2px solid rgba(59, 130, 246, 0.6); }
-        .calendar-day.has-slots { background: rgba(35, 197, 94, 0.15); border: 1px solid rgba(35, 197, 94, 0.4); }
-        .calendar-day.has-bookings { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .time-input { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; width: 80px; text-align: center; }
-        .slot-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(35, 197, 94, 0.2); border: 1px solid rgba(35, 197, 94, 0.4); border-radius: 20px; font-size: 13px; color: #4ade80; margin: 4px; }
-        .slot-tag.locked { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #fbbf24; }
-        .save-btn { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; }
-        .save-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(35, 197, 94, 0.95); color: black; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 100; }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        input { background: rgba(22, 27, 34, 0.8); border: 1px solid rgba(48, 54, 61, 0.6); border-radius: 8px; padding: 10px 12px; color: white; font-size: 14px; width: 100%; }
-        .booking-item { background: rgba(35, 197, 94, 0.1); border: 1px solid rgba(35, 197, 94, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
-        .booking-item.locked { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.4); }
-        .lock-btn { padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; }
-        .lock-btn.lock { background: rgba(245, 158, 11, 0.3); color: #fbbf24; }
-        .lock-btn.unlock { background: rgba(35, 197, 94, 0.3); color: #4ade80; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>艾什后台管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0e;
+    --surface: #0f1218;
+    --surface2: #161b24;
+    --border: #252b38;
+    --accent: #00e5ff;
+    --accent2: #7c4dff;
+    --green: #00e676;
+    --red: #ff1744;
+    --yellow: #ffd740;
+    --orange: #ff9100;
+    --text: #e8eaf0;
+    --text2: #6b7485;
+    --glow: 0 0 20px rgba(0,229,255,0.25);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+  }
+
+  .video-tag {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .video-tag a { color: var(--accent); text-decoration: none; }
+  .video-tag .remove { color: var(--red); cursor: pointer; font-size: 16px; margin-left: 8px; }
+
+  .btn-unlock {
+    flex: 1;
+    padding: 8px;
+    background: rgba(255,145,0,0.1);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-unlock:hover { background: var(--orange); color: #000; }
+
+  /* Login */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 32px;
+    width: 320px;
+    text-align: center;
+  }
+  .login-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .login-sub { font-size: 12px; color: var(--text2); margin-bottom: 28px; }
+  .login-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans SC', sans-serif;
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    text-align: center;
+    letter-spacing: 3px;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .login-err { font-size: 12px; color: var(--red); margin-top: 8px; }
+
+  /* Layout */
+  .admin-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .admin-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  .admin-sub { font-size: 11px; color: var(--text2); }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    opacity: 0.4;
+  }
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 13px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Status toggle */
+  .status-options { display: flex; gap: 10px; }
+  .status-opt {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .status-opt.active-online {
+    border-color: var(--green);
+    background: rgba(0,230,118,0.08);
+  }
+  .status-opt.active-busy {
+    border-color: var(--red);
+    background: rgba(255,23,68,0.08);
+  }
+  .status-opt-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin: 0 auto 6px;
+  }
+  .status-opt-name {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .status-opt-desc { font-size: 11px; color: var(--text2); }
+  .opt-online .status-opt-dot { background: var(--green); }
+  .opt-online .status-opt-name { color: var(--green); }
+  .opt-busy .status-opt-dot { background: var(--red); }
+  .opt-busy .status-opt-name { color: var(--red); }
+
+  /* Mood input */
+  .mood-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .form-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Noto Sans SC', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .btn-save {
+    padding: 10px 16px;
+    background: var(--accent2);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* Calendar */
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-nav {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-month {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 16px;
+  }
+  .cal-day-name {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text2);
+    padding: 3px 0;
+  }
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .cal-day:hover:not(.empty):not(.past) {
+    border-color: var(--accent2);
+    background: rgba(124,77,255,0.1);
+  }
+  .cal-day.today { border-color: var(--accent2); color: var(--accent); font-weight: 700; }
+  .cal-day.selected { background: var(--accent2); color: white; font-weight: 700; }
+  .cal-day.past { color: var(--border); cursor: default; }
+  .cal-day.empty { cursor: default; }
+  .cal-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 2px; }
+  .cal-day.has-slots .cal-dot { background: var(--green); }
+  .cal-day.full .cal-dot { background: var(--red); }
+  .cal-day.selected .cal-dot { background: white; }
+
+  /* Slot management */
+  .slot-date-label {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 10px;
+  }
+  .add-slot-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .time-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-size: 13px;
+    width: 70px;
+    outline: none;
+    text-align: center;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .time-input:focus { border-color: var(--accent); }
+  .btn-add {
+    padding: 8px 16px;
+    background: var(--green);
+    border: none;
+    border-radius: 6px;
+    color: #000;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .existing-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .slot-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .slot-tag .remove {
+    color: var(--red);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .slot-tag .remove:hover { color: white; }
+  .btn-sync {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .btn-sync:hover { opacity: 0.9; box-shadow: var(--glow); }
+
+  /* Bookings */
+  .booking-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .booking-card.pending { border-left: 3px solid var(--yellow); }
+  .booking-card.confirmed { border-left: 3px solid var(--green); }
+  .booking-card.rejected { border-left: 3px solid var(--red); opacity: 0.5; }
+  .booking-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .booking-name { font-weight: 700; font-size: 15px; }
+  .booking-status {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .booking-status.pending { background: rgba(255,215,64,0.15); color: var(--yellow); }
+  .booking-status.confirmed { background: rgba(0,230,118,0.15); color: var(--green); }
+  .booking-status.rejected { background: rgba(255,23,68,0.15); color: var(--red); }
+  .booking-info { font-size: 12px; color: var(--text2); line-height: 1.8; }
+  .booking-info span { color: var(--text); }
+  .booking-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .btn-confirm {
+    flex: 1;
+    padding: 8px;
+    background: rgba(0,230,118,0.15);
+    border: 1px solid var(--green);
+    color: var(--green);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-confirm:hover { background: var(--green); color: #000; }
+  .btn-reject {
+    flex: 1;
+    padding: 8px;
+    background: rgba(255,23,68,0.1);
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-reject:hover { background: var(--red); color: white; }
+  .no-bookings { text-align: center; color: var(--text2); font-size: 13px; padding: 24px 0; }
+
+  /* QR upload */
+  .qr-upload-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .qr-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text2);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .qr-preview img { width: 100%; height: 100%; object-fit: contain; }
+  .qr-info { flex: 1; font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .file-input-label {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: border-color 0.2s;
+  }
+  .file-input-label:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+    box-shadow: var(--glow);
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+</style>
 </head>
 <body>
-    <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        const REPO = 'mrx20001224-commits/ow-booking';
-        const FILE_PATH = 'v2/data.json';
-        
-        // 从 localStorage 读取 Token
-        let GITHUB_TOKEN = localStorage.getItem('github_token');
-        
-        function AdminApp() {
-            const [status, setStatus] = useState('online');
-            const [mood, setMood] = useState('手感爆热，带飞！');
-            const [slots, setSlots] = useState([]);
-            const [bookings, setBookings] = useState([]);
-            const [viewDate, setViewDate] = useState(new Date());
-            const [selectedDay, setSelectedDay] = useState(null);
-            const [startTime, setStartTime] = useState('14');
-            const [endTime, setEndTime] = useState('18');
-            const [isLoading, setIsLoading] = useState(true);
-            const [showToast, setShowToast] = useState(false);
-            const [tokenInput, setTokenInput] = useState('');
-            
-            // 加载数据
-            useEffect(() => {
-                const loadData = async () => {
-                    try {
-                        const response = await fetch(`https://raw.githubusercontent.com/${REPO}/main/${FILE_PATH}?nocache=${Date.now()}`);
-                        if (!response.ok) throw new Error('Network error');
-                        const data = await response.json();
-                        
-                        setStatus(data.status || 'online');
-                        setMood(data.mood || '手感爆热，带飞！');
-                        setSlots(data.slots || []);
-                        setBookings(data.bookings || []);
-                        console.log('Loaded bookings:', data.bookings);
-                    } catch (error) {
-                        console.error('Load error:', error);
-                    } finally {
-                        setIsLoading(false);
-                    }
-                };
-                
-                loadData();
-            }, []);
-            
-            // 保存 Token
-            const saveToken = () => {
-                if (tokenInput) {
-                    localStorage.setItem('github_token', tokenInput);
-                    GITHUB_TOKEN = tokenInput;
-                    alert('Token 已保存');
-                    window.location.reload();
-                }
-            };
-            
-            const year = viewDate.getFullYear(), month = viewDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const days = [];
-            for (let i = 0; i < firstDay; i++) days.push(null);
-            for (let i = 1; i <= daysInMonth; i++) days.push(i);
-            
-            const getDaySlots = (day) => {
-                if (!day || !slots) return [];
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                return slots.filter(s => s.date === dateStr);
-            };
-            
-            const getDayBookings = (day) => {
-                if (!day || !bookings) return [];
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                return bookings.filter(b => b.slots && b.slots.some(s => s.date === dateStr));
-            };
-            
-            const addSlot = () => {
-                if (!selectedDay) { alert('请先选择日期'); return; }
-                const start = parseInt(startTime), end = parseInt(endTime);
-                if (start >= end) { alert('结束时间必须大于开始时间'); return; }
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
-                const newSlots = [];
-                for (let i = start; i < end; i++) {
-                    const timeStr = `${String(i).padStart(2, '0')}:00-${String(i + 1).padStart(2, '0')}:00`;
-                    if (!slots.some(s => s.date === dateStr && s.time_slot === timeStr)) {
-                        newSlots.push({ date: dateStr, time_slot: timeStr, is_available: true, locked: false });
-                    }
-                }
-                setSlots([...slots, ...newSlots]);
-            };
-            
-            const removeSlot = (slot) => { 
-                setSlots(slots.filter(s => !(s.date === slot.date && s.time_slot === slot.time_slot))); 
-            };
-            
-            const toggleLockSlot = (slot) => {
-                setSlots(slots.map(s => {
-                    if (s.date === slot.date && s.time_slot === slot.time_slot) {
-                        return { ...s, locked: !s.locked };
-                    }
-                    return s;
-                }));
-            };
-            
-            const handleSave = async () => {
-                if (!GITHUB_TOKEN) { alert('请先设置 GitHub Token'); return; }
-                
-                const data = { status, mood, slots, bookings, updated_at: new Date().toISOString() };
-                
-                try {
-                    const metaRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, { 
-                        headers: { Authorization: `token ${GITHUB_TOKEN}` }
-                    });
-                    const meta = await metaRes.json();
-                    
-                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-                        method: 'PUT',
-                        headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: 'Update data', content, sha: meta.sha })
-                    });
-                    
-                    if (res.ok) {
-                        setShowToast(true);
-                        setTimeout(() => setShowToast(false), 2000);
-                    } else {
-                        alert('保存失败');
-                    }
-                } catch (e) {
-                    alert('保存失败：' + e.message);
-                }
-            };
-            
-            if (isLoading) return <div className="min-h-screen flex items-center justify-center text-white">加载中...</div>;
-            
-            return <div className="min-h-screen px-4 py-6 max-w-md mx-auto">
-                {/* Token 设置 */}
-                <div className="glass-card rounded-2xl p-5 mb-4">
-                    <h2 className="text-white font-semibold mb-3">GitHub Token {GITHUB_TOKEN ? '✓ 已设置' : '未设置'}</h2>
-                    <input type="password" placeholder={GITHUB_TOKEN ? '已保存，输入新Token可更换' : '输入 GitHub Token'} value={tokenInput} onChange={(e) => setTokenInput(e.target.value)} className="mb-3" />
-                    <div className="flex gap-2">
-                        <button onClick={saveToken} className="flex-1 py-2 bg-blue-500 text-white rounded-lg">{GITHUB_TOKEN ? '更换 Token' : '保存 Token'}</button>
-                        {GITHUB_TOKEN && <button onClick={() => { localStorage.removeItem('github_token'); GITHUB_TOKEN = null; alert('Token 已清除，请刷新页面'); }} className="py-2 px-4 bg-red-500/50 text-white rounded-lg">清除</button>}
-                    </div>
-                    <p className="text-white/40 text-xs mt-2">Token 仅保存在本地浏览器，不会上传</p>
-                </div>
-                
-                <div className="flex items-center justify-between mb-6"><div><h1 className="text-2xl font-bold text-white">后台控制台</h1><p className="text-white/40 text-sm mt-1">管理你的实时状态</p></div><a href="index.html" className="text-blue-400 text-sm hover:underline">查看前台 →</a></div>
-                
-                {/* 状态切换 */}
-                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">当前状态</h2><div className="space-y-3"><button onClick={() => setStatus('online')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'online' ? 'active status-online' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'online' ? 'bg-green-400' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={status === 'online' ? 'text-green-400 font-semibold' : 'text-white font-semibold'}>Online</div><div className="text-sm text-white/50">空闲，可接单</div></div>{status === 'online' && '✓'}</button><button onClick={() => setStatus('busy')} className={`status-btn w-full p-4 rounded-xl flex items-center gap-4 ${status === 'busy' ? 'active status-busy' : 'bg-white/5'}`}><div className={`w-4 h-4 rounded-full ${status === 'busy' ? 'bg-red-400' : 'bg-white/30'}`}></div><div className="text-left flex-1"><div className={status === 'busy' ? 'text-red-400 font-semibold' : 'text-white font-semibold'}>Busy</div><div className="text-sm text-white/50">忙碌，暂停接单</div></div>{status === 'busy' && '✓'}</button></div></div>
-                
-                {/* 心情 */}
-                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">实时心情</h2><input type="text" value={mood} onChange={(e) => setMood(e.target.value)} placeholder="例如：手感爆热，带飞！" maxLength={30} /></div>
-                
-                {/* 日历 */}
-                <div className="glass-card rounded-2xl p-5 mb-4"><div className="flex items-center justify-between mb-4"><h2 className="text-white font-semibold">可预约时间管理</h2><div className="flex gap-2"><button onClick={() => setViewDate(new Date(year, month - 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60">&lt;</button><span className="text-white/80">{year}年{month + 1}月</span><button onClick={() => setViewDate(new Date(year, month + 1, 1))} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60">&gt;</button></div></div><div className="grid grid-cols-7 gap-1 mb-2">{['日','一','二','三','四','五','六'].map(d => <div key={d} className="text-center text-white/40 text-xs py-2">{d}</div>)}</div><div className="grid grid-cols-7 gap-1 mb-4">{days.map((day, idx) => { if (!day) return <div key={idx} className="calendar-day" style={{background:'transparent'}}></div>; const daySlots = getDaySlots(day); const dayBookings = getDayBookings(day); return <div key={day} className={`calendar-day ${selectedDay === day ? 'selected' : ''} ${daySlots.length > 0 ? 'has-slots' : ''} ${dayBookings.length > 0 ? 'has-bookings' : ''}`} onClick={() => setSelectedDay(selectedDay === day ? null : day)}><span>{day}</span>{(daySlots.length > 0 || dayBookings.length > 0) && <div className="absolute bottom-1 flex gap-0.5">{daySlots.length > 0 && <div className="w-1 h-1 rounded-full bg-green-400"></div>}{dayBookings.length > 0 && <div className="w-1 h-1 rounded-full bg-yellow-400"></div>}</div>}</div>; })}</div>{selectedDay && <div className="border-t border-white/10 pt-4"><p className="text-white font-medium mb-3">{year}-{String(month + 1).padStart(2, '0')}-{String(selectedDay).padStart(2, '0')} 时间段设置</p><div className="flex items-center gap-3 mb-4"><div className="flex items-center gap-2"><input type="number" min="0" max="23" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><span className="text-white/40">至</span><div className="flex items-center gap-2"><input type="number" min="1" max="24" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-input" /><span className="text-white/60">:00</span></div><button onClick={addSlot} className="px-4 py-2 bg-green-500/80 text-white rounded-lg text-sm">添加</button></div><div className="flex flex-wrap">{getDaySlots(selectedDay).length === 0 ? <p className="text-white/40 text-sm">该日期暂无可用时段</p> : getDaySlots(selectedDay).map((slot, idx) => <span key={idx} className={`slot-tag ${slot.locked ? 'locked' : ''}`}>{slot.time_slot}{slot.locked && ' 🔒'}<button onClick={() => toggleLockSlot(slot)} className="lock-btn ml-1">{slot.locked ? '解锁' : '锁定'}</button><button onClick={() => removeSlot(slot)} className="ml-1 text-red-400">×</button></span>)}</div></div>}</div>
-                
-                {/* 预约记录 */}
-                <div className="glass-card rounded-2xl p-5 mb-4"><h2 className="text-white font-semibold mb-4">预约记录 ({bookings.length})</h2>{bookings.length === 0 ? <p className="text-white/40 text-sm">暂无预约</p> : <div className="space-y-2 max-h-80 overflow-y-auto">{bookings.map((booking, idx) => <div key={idx} className={`booking-item ${booking.locked ? 'locked' : ''}`}><div className="flex justify-between items-start"><div className="flex-1"><p className="text-white font-medium">{booking.customer_name || '匿名用户'}</p><p className="text-white/60 text-sm">{booking.customer_contact || '无联系方式'}</p><p className="text-blue-400 text-sm">{booking.price_rank} · {booking.price_amount}r/h</p><p className="text-white/40 text-xs mt-1">{booking.slots && booking.slots.map(s => `${s.date} ${s.time_slot}`).join(', ')}</p>{booking.notes && <p className="text-white/30 text-xs mt-1">备注: {booking.notes}</p>}</div><div className="flex flex-col gap-1"><span className={`px-2 py-0.5 rounded text-xs ${booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>{booking.status === 'pending' ? '待确认' : booking.status === 'confirmed' ? '已确认' : booking.status}</span>{booking.locked && <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">🔒 已锁定</span>}</div></div></div>)}</div>}</div>
-                
-                <button onClick={handleSave} className="save-btn w-full py-4 rounded-xl text-white font-bold text-lg">保存并同步到所有用户</button>
-                <div className={`toast ${showToast ? 'show' : ''}`}>✓ 已同步</div>
-            </div>;
-        }
-        
-        ReactDOM.createRoot(document.getElementById('root')).render(<AdminApp />);
-    </script>
+
+<!-- Login -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">ADMIN</div>
+    <div class="login-sub">艾什后台管理系统</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="输入密码" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">进入后台</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="adminPanel" style="display:none">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">ADMIN PANEL</div>
+      <div class="admin-sub">艾什 · OW陪玩后台</div>
+    </div>
+    <div style="font-size:12px;color:var(--text2)" id="lastSync">实时同步中</div>
+  </div>
+
+  <div class="container">
+
+    <!-- Profile -->
+    <div class="section">
+      <div class="section-title">个人资料</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">显示名称</div>
+        <div class="mood-row">
+          <input class="form-input" type="text" id="nameInput" placeholder="你的名字/昵称">
+          <button class="btn-save" onclick="saveName()">保存</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">头像</div>
+      <div class="qr-upload-row">
+        <div class="qr-preview" id="avatarPreview">暂无</div>
+        <div class="qr-info">
+          上传头像图片，显示在前台顶部
+          <br><br>
+          <label class="file-input-label">
+            📎 选择图片
+            <input type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="section">
+      <div class="section-title">当前状态</div>
+      <div class="status-options">
+        <div class="status-opt opt-online" id="optOnline" onclick="setStatus(true)">
+          <div class="status-opt-dot"></div>
+          <div class="status-opt-name">Online</div>
+          <div class="status-opt-desc">空闲，可接单</div>
+        </div>
+        <div class="status-opt opt-busy" id="optBusy" onclick="setStatus(false)">
+          <div class="status-opt-dot"></div>
+          <div class="status-opt-name">Busy</div>
+          <div class="status-opt-desc">忙碌，暂停接单</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mood -->
+    <div class="section">
+      <div class="section-title">实时心情</div>
+      <div class="mood-row">
+        <input class="form-input" type="text" id="moodInput" placeholder="今天状态怎么样？">
+        <button class="btn-save" onclick="saveMood()">更新</button>
+      </div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="section">
+      <div class="section-title">收款二维码</div>
+      <div class="qr-upload-row">
+        <div class="qr-preview" id="qrPreview">暂无</div>
+        <div class="qr-info">
+          上传微信收款码，客户预约后可见
+          <br><br>
+          <label class="file-input-label">
+            📎 选择图片
+            <input type="file" accept="image/*" style="display:none" onchange="uploadQR(this)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Management -->
+    <div class="section">
+      <div class="section-title">高光视频管理</div>
+      <div id="videoList" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input class="form-input" type="text" id="videoTitle" placeholder="视频标题（如：艾什 - 好莱坞五杀）">
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" type="text" id="videoUrl" placeholder="B站或YouTube链接">
+        <button class="btn-save" onclick="addVideo()">添加</button>
+      </div>
+    </div>
+
+    <!-- Slot Management -->
+    <div class="section">
+      <div class="section-title">可预约时间管理</div>
+      <div class="calendar-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="cal-month" id="calMonth"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+
+      <div id="slotEditor" style="display:none">
+        <div class="slot-date-label" id="slotDateLabel"></div>
+        <div class="existing-slots" id="existingSlots"></div>
+        <div class="add-slot-row">
+          <input class="time-input" type="number" id="startH" min="0" max="23" placeholder="9" value="9">
+          <span style="color:var(--text2);font-size:13px">:00 至</span>
+          <input class="time-input" type="number" id="endH" min="1" max="24" placeholder="10" value="10">
+          <span style="color:var(--text2);font-size:13px">:00</span>
+          <button class="btn-add" onclick="addSlot()">添加</button>
+        </div>
+        <button class="btn-sync" onclick="saveSlots()">保存并同步到所有用户</button>
+      </div>
+    </div>
+
+    <!-- Bookings -->
+    <div class="section">
+      <div class="section-title">
+        预约记录
+        <span class="badge-count" id="pendingCount" style="display:none">0</span>
+      </div>
+      <div id="bookingsList">
+        <div class="no-bookings">暂无预约</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCSq1sCN6BYxlD1dzpDVFDfovPI3nwKd3I",
+    authDomain: "ow-booking.firebaseapp.com",
+    projectId: "ow-booking",
+    storageBucket: "ow-booking.firebasestorage.app",
+    messagingSenderId: "692934511623",
+    appId: "1:692934511623:web:e48fb09fda25fa059daea2",
+    measurementId: "G-FMYWX8GYPL"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.db = db;
+  window.dbLib = { doc, setDoc, updateDoc, onSnapshot, collection, getDoc };
+
+  // Status listener
+  onSnapshot(doc(db, 'settings', 'status'), (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    window.currentStatus = data.online !== false;
+    window.currentName = data.name || '';
+    window.currentAvatar = data.avatar || null;
+    renderStatus(window.currentStatus);
+    if (data.mood) document.getElementById('moodInput').value = data.mood;
+    if (data.name) document.getElementById('nameInput').value = data.name;
+    if (data.avatar) {
+      document.getElementById('avatarPreview').innerHTML = `<img src="${data.avatar}">`;
+    }
+    if (data.qr) {
+      document.getElementById('qrPreview').innerHTML = `<img src="${data.qr}">`;
+      window.currentQR = data.qr;
+    }
+    window.currentVideos = data.videos || [];
+    renderVideos(window.currentVideos);
+    document.getElementById('lastSync').textContent = '✓ 已同步 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+  });
+
+  // Auto-delete past bookings
+  const autoCleanPast = async () => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    const snap2 = await getDocs(collection(db, 'bookings'));
+    snap2.forEach(async d => {
+      const b = d.data();
+      if (b.date && b.date < todayStr) await deleteDoc(d.ref);
+    });
+  };
+
+  // Slots listener
+  window.slotsData = {};
+  onSnapshot(collection(db, 'slots'), (snap) => {
+    window.slotsData = {};
+    snap.forEach(d => { window.slotsData[d.id] = d.data().times || []; });
+    renderCalendar();
+    if (window.adminSelectedDate) renderSlotEditor(window.adminSelectedDate);
+  });
+
+  // Bookings listener
+  onSnapshot(collection(db, 'bookings'), (snap) => {
+    const bookings = [];
+    snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
+    bookings.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    window.allBookings = bookings;
+    renderBookings(bookings);
+    // Track booked slots
+    window.bookingsData = {};
+    bookings.forEach(b => {
+      if (b.status === 'confirmed' || b.status === 'pending') {
+        if (!window.bookingsData[b.date]) window.bookingsData[b.date] = [];
+        b.time.split(', ').forEach(t => window.bookingsData[b.date].push(t));
+      }
+    });
+    renderCalendar();
+  });
+
+  window.saveToDb = async (path, id, data) => {
+    const { doc, setDoc } = window.dbLib;
+    await setDoc(doc(db, path, id), data);
+  };
+  window.updateInDb = async (path, id, data) => {
+    const { doc, updateDoc } = window.dbLib;
+    await updateDoc(doc(db, path, id), data);
+  };
+
+  // Run auto-clean after login
+  window.runAutoClean = autoCleanPast;
+</script>
+
+<script>
+  const ADMIN_PASSWORD = 'aishi2024';
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth();
+  window.adminSelectedDate = null;
+  window.currentStatus = true;
+  window.currentQR = null;
+  window.editingSlots = [];
+  window.allBookings = [];
+  window.slotsData = {};
+  window.bookingsData = {};
+
+  function login() {
+    const pw = document.getElementById('pwInput').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      renderCalendar();
+      if (window.runAutoClean) window.runAutoClean();
+    } else {
+      document.getElementById('loginErr').textContent = '密码错误';
+    }
+  }
+  window.login = login;
+
+  function getSettings() {
+    return {
+      online: window.currentStatus,
+      mood: document.getElementById('moodInput').value || '',
+      name: window.currentName || '',
+      avatar: window.currentAvatar || null,
+      qr: window.currentQR || null,
+      videos: window.currentVideos || []
+    };
+  }
+
+  async function saveName() {
+    const name = document.getElementById('nameInput').value.trim();
+    if (!name) return showToast('请输入名称');
+    window.currentName = name;
+    try {
+      await window.saveToDb('settings', 'status', getSettings());
+      showToast('✓ 名称已更新');
+    } catch(e) { showToast('保存失败'); }
+  }
+  window.saveName = saveName;
+
+  function uploadAvatar(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      window.currentAvatar = e.target.result;
+      document.getElementById('avatarPreview').innerHTML = `<img src="${e.target.result}">`;
+      try {
+        await window.saveToDb('settings', 'status', getSettings());
+        showToast('✓ 头像已更新');
+      } catch(e) { showToast('上传失败'); }
+    };
+    reader.readAsDataURL(file);
+  }
+  window.uploadAvatar = uploadAvatar;
+
+  function renderStatus(isOnline) {
+    const list = document.getElementById('videoList');
+    if (!list) return;
+    if (!videos || videos.length === 0) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text2)">暂无视频</div>';
+      return;
+    }
+    list.innerHTML = '';
+    videos.forEach((v, i) => {
+      const el = document.createElement('div');
+      el.className = 'video-tag';
+      el.innerHTML = `<div><div style="font-weight:600">${v.title}</div><a href="${v.url}" target="_blank">${v.url.substring(0,40)}...</a></div><span class="remove" onclick="removeVideo(${i})">×</span>`;
+      list.appendChild(el);
+    });
+  }
+
+  async function addVideo() {
+    const title = document.getElementById('videoTitle').value.trim();
+    const url = document.getElementById('videoUrl').value.trim();
+    if (!title || !url) return showToast('请填写标题和链接');
+    window.currentVideos = window.currentVideos || [];
+    window.currentVideos.push({ title, url });
+    try {
+      await window.saveToDb('settings', 'status', getSettings());
+      document.getElementById('videoTitle').value = '';
+      document.getElementById('videoUrl').value = '';
+      showToast('✓ 视频已添加');
+    } catch(e) { showToast('添加失败'); }
+  }
+  window.addVideo = addVideo;
+
+  async function removeVideo(idx) {
+    window.currentVideos.splice(idx, 1);
+    try {
+      await window.saveToDb('settings', 'status', getSettings());
+      showToast('已删除');
+    } catch(e) { showToast('删除失败'); }
+  }
+  window.removeVideo = removeVideo;
+
+  function renderStatus(isOnline) {
+    document.getElementById('optOnline').className = 'status-opt opt-online' + (isOnline ? ' active-online' : '');
+    document.getElementById('optBusy').className = 'status-opt opt-busy' + (!isOnline ? ' active-busy' : '');
+  }
+
+  async function setStatus(online) {
+    window.currentStatus = online;
+    try {
+      await window.saveToDb('settings', 'status', getSettings());
+      showToast(online ? '✓ 已切换为 Online' : '✓ 已切换为 Busy');
+    } catch(e) { showToast('保存失败'); }
+  }
+  window.setStatus = setStatus;
+
+  async function saveMood() {
+    try {
+      await window.saveToDb('settings', 'status', getSettings());
+      showToast('✓ 心情已更新');
+    } catch(e) { showToast('保存失败'); }
+  }
+  window.saveMood = saveMood;
+
+  function uploadQR(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      window.currentQR = e.target.result;
+      document.getElementById('qrPreview').innerHTML = `<img src="${e.target.result}">`;
+      try {
+        await window.saveToDb('settings', 'status', getSettings());
+        showToast('✓ 收款码已更新');
+      } catch(e) { showToast('上传失败'); }
+    };
+    reader.readAsDataURL(file);
+  }
+  window.uploadQR = uploadQR;
+
+  const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const dayNames = ['日','一','二','三','四','五','六'];
+
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar();
+  }
+  window.changeMonth = changeMonth;
+
+  function renderCalendar() {
+    const calMonth = document.getElementById('calMonth');
+    if (!calMonth) return;
+    calMonth.textContent = `${currentYear}年${monthNames[currentMonth]}`;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    dayNames.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-day-name';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date();
+
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = document.createElement('div');
+      const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const thisDate = new Date(currentYear, currentMonth, d);
+      const isPast = thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const isToday = thisDate.toDateString() === today.toDateString();
+
+      const slots = window.slotsData[dateStr] || [];
+      const booked = window.bookingsData[dateStr] || [];
+      const free = slots.filter(s => !booked.includes(s));
+      const hasSlots = slots.length > 0;
+      const isFull = hasSlots && free.length === 0;
+
+      el.className = 'cal-day';
+      if (isPast) el.classList.add('past');
+      if (isToday) el.classList.add('today');
+      if (window.adminSelectedDate === dateStr) el.classList.add('selected');
+      if (hasSlots && !isFull) el.classList.add('has-slots');
+      if (isFull) el.classList.add('full');
+      el.innerHTML = `<span>${d}</span>${hasSlots ? '<div class="cal-dot"></div>' : ''}`;
+      el.onclick = () => selectAdminDate(dateStr);
+      grid.appendChild(el);
+    }
+  }
+
+  function selectAdminDate(dateStr) {
+    window.adminSelectedDate = dateStr;
+    window.editingSlots = [...(window.slotsData[dateStr] || [])];
+    renderCalendar();
+    renderSlotEditor(dateStr);
+  }
+
+  function renderSlotEditor(dateStr) {
+    document.getElementById('slotEditor').style.display = 'block';
+    document.getElementById('slotDateLabel').textContent = dateStr + ' 时间段设置';
+    const existing = document.getElementById('existingSlots');
+    const slots = window.editingSlots;
+    existing.innerHTML = '';
+    if (slots.length === 0) {
+      existing.innerHTML = '<span style="font-size:12px;color:var(--text2)">暂无时段，请添加</span>';
+    } else {
+      slots.sort().forEach(s => {
+        const tag = document.createElement('div');
+        tag.className = 'slot-tag';
+        tag.innerHTML = `${s} <span class="remove" onclick="removeSlot('${s}')">×</span>`;
+        existing.appendChild(tag);
+      });
+    }
+  }
+
+  function addSlot() {
+    const sh = parseInt(document.getElementById('startH').value);
+    const eh = parseInt(document.getElementById('endH').value);
+    if (isNaN(sh) || isNaN(eh) || eh <= sh) return showToast('时间段无效');
+    for (let h = sh; h < eh; h++) {
+      const slot = `${String(h).padStart(2,'0')}:00-${String(h+1).padStart(2,'0')}:00`;
+      if (!window.editingSlots.includes(slot)) window.editingSlots.push(slot);
+    }
+    renderSlotEditor(window.adminSelectedDate);
+  }
+  window.addSlot = addSlot;
+
+  function removeSlot(s) {
+    window.editingSlots = window.editingSlots.filter(x => x !== s);
+    renderSlotEditor(window.adminSelectedDate);
+  }
+  window.removeSlot = removeSlot;
+
+  async function saveSlots() {
+    if (!window.adminSelectedDate) return;
+    try {
+      await window.saveToDb('slots', window.adminSelectedDate, { times: window.editingSlots });
+      showToast('✓ 已同步到所有用户');
+    } catch(e) { showToast('保存失败'); }
+  }
+  window.saveSlots = saveSlots;
+
+  function renderBookings(bookings) {
+    const list = document.getElementById('bookingsList');
+    const pending = bookings.filter(b => b.status === 'pending');
+    const countEl = document.getElementById('pendingCount');
+    if (pending.length > 0) {
+      countEl.style.display = 'flex';
+      countEl.textContent = pending.length;
+    } else {
+      countEl.style.display = 'none';
+    }
+
+    if (bookings.length === 0) {
+      list.innerHTML = '<div class="no-bookings">暂无预约记录</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    bookings.forEach(b => {
+      const card = document.createElement('div');
+      card.className = `booking-card ${b.status}`;
+      const statusMap = { pending: '待确认', confirmed: '已锁定', rejected: '已拒绝' };
+      const statusClass = b.status;
+      card.innerHTML = `
+        <div class="booking-top">
+          <div class="booking-name">${b.name}</div>
+          <div class="booking-status ${statusClass}">${statusMap[b.status] || b.status}</div>
+        </div>
+        <div class="booking-info">
+          联系方式：<span>${b.contact}</span><br>
+          服务项目：<span>${b.service} · ${b.price}r/h</span><br>
+          预约时间：<span>${b.date} ${b.time}</span><br>
+          时长/金额：<span>${b.hours}小时 · 约${b.total}r</span>
+          ${b.note ? `<br>备注：<span>${b.note}</span>` : ''}
+        </div>
+        ${b.status === 'pending' ? `
+        <div class="booking-actions">
+          <button class="btn-confirm" onclick="confirmBooking('${b.id}')">✓ 确认锁定</button>
+          <button class="btn-reject" onclick="rejectBooking('${b.id}')">✗ 拒绝</button>
+        </div>` : ''}
+        ${b.status === 'confirmed' ? `
+        <div class="booking-actions">
+          <button class="btn-unlock" onclick="unlockBooking('${b.id}')">↩ 取消锁定</button>
+        </div>` : ''}
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  async function confirmBooking(id) {
+    try {
+      await window.updateInDb('bookings', id, { status: 'confirmed' });
+      showToast('✓ 已确认锁定，时间段标红不可预约');
+    } catch(e) { showToast('操作失败'); }
+  }
+  window.confirmBooking = confirmBooking;
+
+  async function unlockBooking(id) {
+    try {
+      await window.updateInDb('bookings', id, { status: 'pending' });
+      showToast('↩ 已取消锁定，时间段恢复可预约');
+    } catch(e) { showToast('操作失败'); }
+  }
+  window.unlockBooking = unlockBooking;
+
+  async function rejectBooking(id) {
+    try {
+      await window.updateInDb('bookings', id, { status: 'rejected' });
+      showToast('已拒绝该预约');
+    } catch(e) { showToast('操作失败'); }
+  }
+  window.rejectBooking = rejectBooking;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
 </body>
 </html>
